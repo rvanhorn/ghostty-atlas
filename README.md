@@ -59,6 +59,8 @@ pnpm themes:refresh /Applications/Ghostty.app/Contents/Resources/ghostty/themes
 
 A directory argument or `GHOSTTY_THEMES_DIR` overrides the upstream download. Leave the override unset for hosting. Catalog numbers are assigned by sorted name, so they can move when upstream adds or renames themes. Saved themes use names rather than numbers.
 
+Set `GITHUB_TOKEN` to authenticate the upstream GitHub API listing and avoid the lower anonymous rate limit. The Pages workflow supplies its built-in token automatically; theme file downloads do not receive the token.
+
 ## GitHub Pages
 
 [`.github/workflows/pages.yml`](.github/workflows/pages.yml) checks pull requests and deploys pushes to `main`. A manual run is also available in the Actions tab.
