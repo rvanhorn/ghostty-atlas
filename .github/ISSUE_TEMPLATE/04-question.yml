@@ -1,0 +1,63 @@
+name: "Question"
+description: "Ask for help using or contributing to Atlas."
+labels:
+  - "Needs Triage"
+  - "Question"
+body:
+  - type: "markdown"
+    attributes:
+      value: "Use this form for Ghostty Atlas. Native Ghostty issues belong in the Ghostty repository. Theme palette contributions belong in [iTerm2 Color Schemes](https://github.com/mbadolato/iTerm2-Color-Schemes). Remove private paths and sensitive values from config examples and logs."
+  - type: "checkboxes"
+    id: "existing-issues"
+    attributes:
+      label: "Before Submitting"
+      description: "Help keep reports focused and avoid duplicates."
+      options:
+        - label: "I searched existing issues for a matching report or request."
+          required: true
+  - type: "dropdown"
+    id: "area"
+    attributes:
+      label: "Affected Area"
+      description: "Choose the closest part of Atlas."
+      options:
+        - "Theme Catalog and Search"
+        - "Theme Comparison"
+        - "Terminal Preview"
+        - "Config Editor"
+        - "Config Import and Export"
+        - "Bookmarks and Browser Storage"
+        - "Accessibility"
+        - "Build and Deployment"
+        - "Documentation"
+        - "Other"
+    validations:
+      required: true
+  - type: "textarea"
+    id: "question"
+    attributes:
+      label: "Question"
+      description: "Explain what you want to understand or accomplish."
+    validations:
+      required: true
+  - type: "textarea"
+    id: "attempts"
+    attributes:
+      label: "What You Have Tried"
+      description: "Describe the documentation, steps, or approaches you already tried."
+    validations:
+      required: true
+  - type: "textarea"
+    id: "environment"
+    attributes:
+      label: "Environment and Context"
+      description: "Include your browser and OS versions, Atlas URL, theme, or minimal config when relevant."
+    validations:
+      required: false
+  - type: "textarea"
+    id: "outcome"
+    attributes:
+      label: "Desired Outcome"
+      description: "Describe the result you are trying to reach."
+    validations:
+      required: false

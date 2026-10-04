@@ -1,0 +1,45 @@
+name: "Documentation"
+description: "Report missing, unclear, or incorrect documentation."
+labels:
+  - "Needs Triage"
+  - "Documentation"
+body:
+  - type: "markdown"
+    attributes:
+      value: "Use this form for Ghostty Atlas. Native Ghostty issues belong in the Ghostty repository. Theme palette contributions belong in [iTerm2 Color Schemes](https://github.com/mbadolato/iTerm2-Color-Schemes). Remove private paths and sensitive values from config examples and logs."
+  - type: "checkboxes"
+    id: "existing-issues"
+    attributes:
+      label: "Before Submitting"
+      description: "Help keep reports focused and avoid duplicates."
+      options:
+        - label: "I searched existing issues for a matching report or request."
+          required: true
+  - type: "input"
+    id: "location"
+    attributes:
+      label: "Documentation Location"
+      description: "Link to the page, file, section, or interface text."
+    validations:
+      required: true
+  - type: "textarea"
+    id: "problem"
+    attributes:
+      label: "Problem"
+      description: "Explain what is missing, confusing, or inaccurate."
+    validations:
+      required: true
+  - type: "textarea"
+    id: "correction"
+    attributes:
+      label: "Suggested Correction"
+      description: "Describe the information or example that would help."
+    validations:
+      required: true
+  - type: "textarea"
+    id: "context"
+    attributes:
+      label: "Additional Context"
+      description: "Include the command, environment, or workflow involved."
+    validations:
+      required: false

@@ -1,0 +1,55 @@
+name: "Other"
+description: "Raise a topic that does not fit the other forms."
+labels:
+  - "Needs Triage"
+body:
+  - type: "markdown"
+    attributes:
+      value: "Use this form for Ghostty Atlas. Native Ghostty issues belong in the Ghostty repository. Theme palette contributions belong in [iTerm2 Color Schemes](https://github.com/mbadolato/iTerm2-Color-Schemes). Remove private paths and sensitive values from config examples and logs."
+  - type: "checkboxes"
+    id: "existing-issues"
+    attributes:
+      label: "Before Submitting"
+      description: "Help keep reports focused and avoid duplicates."
+      options:
+        - label: "I searched existing issues for a matching report or request."
+          required: true
+  - type: "dropdown"
+    id: "area"
+    attributes:
+      label: "Affected Area"
+      description: "Choose the closest part of Atlas."
+      options:
+        - "Theme Catalog and Search"
+        - "Theme Comparison"
+        - "Terminal Preview"
+        - "Config Editor"
+        - "Config Import and Export"
+        - "Bookmarks and Browser Storage"
+        - "Accessibility"
+        - "Build and Deployment"
+        - "Documentation"
+        - "Other"
+    validations:
+      required: true
+  - type: "textarea"
+    id: "summary"
+    attributes:
+      label: "Summary"
+      description: "Describe the topic and why it matters to Atlas."
+    validations:
+      required: true
+  - type: "textarea"
+    id: "outcome"
+    attributes:
+      label: "Requested Outcome"
+      description: "Explain the action or decision you would like."
+    validations:
+      required: true
+  - type: "textarea"
+    id: "context"
+    attributes:
+      label: "Additional Context"
+      description: "Include relevant links, examples, screenshots, or environment details."
+    validations:
+      required: false

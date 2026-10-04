@@ -1,6 +1,7 @@
 #!/bin/sh
 set -eu
 
+pnpm format
 pnpm check
 # Include the generated catalog only after all checks succeed.
 git add -- src/data/themes.js

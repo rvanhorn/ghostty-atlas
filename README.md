@@ -2,7 +2,7 @@
 
 Browse Ghostty themes, compare terminal palettes, and build a configuration with a live browser preview. Atlas runs entirely in the browser; visitors do not need Ghostty installed.
 
-[Live app](https://rvanhorn.github.io/ghostty-atlas/) · [Contributing](CONTRIBUTING.md) · [Commit guide](COMMIT.md)
+[Live app](https://rvanhorn.github.io/ghostty-atlas/) · [Changelog](CHANGELOG.md) · [Contributing](CONTRIBUTING.md) · [Commit guide](COMMIT.md)
 
 ## What You Can Do
 
@@ -65,6 +65,8 @@ The build job installs the locked dependencies, refreshes themes, and runs `pnpm
 In repository **Settings → Pages**, select **GitHub Actions** as the publishing source. The project URL is <https://rvanhorn.github.io/ghostty-atlas/>.
 
 `PAGES_BASE=/ghostty-atlas/` gives Vite the project subdirectory used by Pages. Local builds default to relative asset URLs. For a custom domain, change the workflow's `PAGES_BASE` to `/` and configure the domain in Pages settings.
+
+Shared links use Open Graph and large-image card metadata in `src/index.html`. The 1200 × 630 image in `src/public/social-preview.png` includes the project logo and feature badges, and Vite copies it unchanged into the build. When changing the public site URL, also update the canonical, Open Graph, and card image URLs in `src/index.html`. Chat apps control the final card layout and may cache previews until they fetch the link again.
 
 To check the same path locally:
 

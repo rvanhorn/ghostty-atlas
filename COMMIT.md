@@ -1,6 +1,7 @@
 # Commit Guide
 
-This repository uses Conventional Commit headers and plain-English bodies. The writing guidance follows the dotfiles project's preference for complete sentences, one topic per sentence, and no assistant attribution.
+This repository uses Conventional Commit headers and plain-English bodies. The writing guidance follows the dotfiles
+project's preference for complete sentences, one topic per sentence, and no assistant attribution.
 
 ## Header
 
@@ -8,7 +9,8 @@ This repository uses Conventional Commit headers and plain-English bodies. The w
 type(scope): subject
 ```
 
-Use a lowercase imperative subject without a trailing period. Keep the header under 100 characters. The scope names the part of Atlas that changes.
+Use a lowercase imperative subject without a trailing period. Keep the header under 100 characters. The scope names the
+part of Atlas that changes.
 
 | Type       | Use                                                      |
 | ---------- | -------------------------------------------------------- |
@@ -24,7 +26,8 @@ Use a lowercase imperative subject without a trailing period. Keep the header un
 | `chore`    | Maintain repository configuration.                       |
 | `revert`   | Revert an earlier change.                                |
 
-Use scopes such as `app`, `catalog`, `config`, `compare`, `preview`, `ui`, `themes`, `repo`, `docs`, and `pages`. Prefer an existing spelling when it fits.
+Use scopes such as `app`, `catalog`, `config`, `compare`, `preview`, `ui`, `themes`, `repo`, `docs`, and `pages`. Prefer
+an existing spelling when it fits.
 
 ```text
 fix(catalog): match numeric substrings in theme search
@@ -35,7 +38,8 @@ ci(pages): deploy validated builds to GitHub Pages
 
 ## Body
 
-Add a body when the header does not explain the reason, tradeoff, or migration. Use complete sentences and one topic per sentence. Avoid slash shorthand and dense lists of filenames; the diff already shows the edits.
+Add a body when the header does not explain the reason, tradeoff, or migration. Use complete sentences and one topic per
+sentence. Avoid slash shorthand and dense lists of filenames; the diff already shows the edits.
 
 ```text
 fix(catalog): match numeric substrings in theme search
@@ -49,11 +53,16 @@ Do not claim validation that was not run. Omit AI attribution, generated-by text
 
 ## Commit Scope and Checks
 
-Keep one concern per commit, including its supporting tests and documentation. Do not separate a rename from the import changes that make it work. Review `git diff --cached` before committing.
+Keep one concern per commit, including its supporting tests and documentation. Do not separate a rename from the import
+changes that make it work. Review `git diff --cached` before committing.
 
-The pre-commit hook refreshes themes, formats the generated file, and runs lint, tests, build, and formatting checks. It stages the generated catalog only after success. Review the refreshed catalog alongside your own changes. Stage other corrections explicitly and rerun the commit if a check fails.
+The pre-commit hook formats the project, refreshes themes, formats the generated file, and runs lint, tests, build, and formatting checks. It
+stages the generated catalog only after success. Review the refreshed catalog alongside your own changes. Stage other
+corrections explicitly and rerun the commit if a check fails.
 
-The project has no commit-message enforcement hook; this file is the writing convention. Normal commits use the current timestamp. A reconstructed history may use earlier author and committer dates only when the repository owner explicitly requests it.
+The project has no commit-message enforcement hook; this file is the writing convention. Normal commits use the current
+timestamp. A reconstructed history may use earlier author and committer dates only when the repository owner explicitly
+requests it.
 
 ## Breaking Changes
 

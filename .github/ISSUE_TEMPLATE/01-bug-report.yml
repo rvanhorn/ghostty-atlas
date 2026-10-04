@@ -1,0 +1,110 @@
+name: "Bug Report"
+description: "Report a reproducible problem with Ghostty Atlas."
+labels:
+  - "Needs Triage"
+  - "Bug"
+body:
+  - type: "markdown"
+    attributes:
+      value: "Use this form for Ghostty Atlas. Native Ghostty issues belong in the Ghostty repository. Theme palette contributions belong in [iTerm2 Color Schemes](https://github.com/mbadolato/iTerm2-Color-Schemes). Remove private paths and sensitive values from config examples and logs."
+  - type: "checkboxes"
+    id: "existing-issues"
+    attributes:
+      label: "Before Submitting"
+      description: "Help keep reports focused and avoid duplicates."
+      options:
+        - label: "I searched existing issues for a matching report or request."
+          required: true
+  - type: "dropdown"
+    id: "area"
+    attributes:
+      label: "Affected Area"
+      description: "Choose the closest part of Atlas."
+      options:
+        - "Theme Catalog and Search"
+        - "Theme Comparison"
+        - "Terminal Preview"
+        - "Config Editor"
+        - "Config Import and Export"
+        - "Bookmarks and Browser Storage"
+        - "Accessibility"
+        - "Build and Deployment"
+        - "Documentation"
+        - "Other"
+    validations:
+      required: true
+  - type: "textarea"
+    id: "summary"
+    attributes:
+      label: "Problem"
+      description: "Describe what went wrong and how it affects your workflow."
+    validations:
+      required: true
+  - type: "textarea"
+    id: "steps"
+    attributes:
+      label: "Steps to Reproduce"
+      description: "List the steps, including theme names or settings needed to reproduce the problem."
+      placeholder: "1. Open Atlas.\n2. Select a theme or import a config.\n3. Change a setting.\n4. Describe the failure."
+    validations:
+      required: true
+  - type: "textarea"
+    id: "expected"
+    attributes:
+      label: "Expected Behavior"
+      description: "What should have happened?"
+    validations:
+      required: true
+  - type: "textarea"
+    id: "actual"
+    attributes:
+      label: "Actual Behavior"
+      description: "What happened instead? Include the exact error if there is one."
+    validations:
+      required: true
+  - type: "input"
+    id: "browser"
+    attributes:
+      label: "Browser and Version"
+      description: "Include the browser name and full version."
+      placeholder: "Firefox 143.0"
+    validations:
+      required: true
+  - type: "input"
+    id: "os"
+    attributes:
+      label: "Operating System and Version"
+      description: "Include your operating system and version."
+      placeholder: "macOS 15.6"
+    validations:
+      required: true
+  - type: "input"
+    id: "app-source"
+    attributes:
+      label: "Atlas URL or Commit"
+      description: "Share the deployed URL or local Git commit and whether you are using a local build."
+      placeholder: "https://rvanhorn.github.io/ghostty-atlas/"
+    validations:
+      required: true
+  - type: "input"
+    id: "ghostty-version"
+    attributes:
+      label: "Ghostty Version"
+      description: "Only needed when the exported config or native rendering is involved."
+    validations:
+      required: false
+  - type: "textarea"
+    id: "config"
+    attributes:
+      label: "Minimal Config Example"
+      description: "Include only the settings needed to reproduce import, export, or preview problems."
+      render: "text"
+    validations:
+      required: false
+  - type: "textarea"
+    id: "evidence"
+    attributes:
+      label: "Screenshots and Logs"
+      description: "Attach screenshots or paste relevant browser console output. Include screen size, assistive technology, or keyboard steps for accessibility problems."
+    validations:
+      required: false

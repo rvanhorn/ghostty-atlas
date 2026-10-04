@@ -1,0 +1,70 @@
+name: "Feature Request"
+description: "Suggest a new capability or improvement to Atlas."
+labels:
+  - "Needs Triage"
+  - "Feature Request"
+body:
+  - type: "markdown"
+    attributes:
+      value: "Use this form for Ghostty Atlas. Native Ghostty issues belong in the Ghostty repository. Theme palette contributions belong in [iTerm2 Color Schemes](https://github.com/mbadolato/iTerm2-Color-Schemes). Remove private paths and sensitive values from config examples and logs."
+  - type: "checkboxes"
+    id: "existing-issues"
+    attributes:
+      label: "Before Submitting"
+      description: "Help keep reports focused and avoid duplicates."
+      options:
+        - label: "I searched existing issues for a matching report or request."
+          required: true
+  - type: "dropdown"
+    id: "area"
+    attributes:
+      label: "Affected Area"
+      description: "Choose the closest part of Atlas."
+      options:
+        - "Theme Catalog and Search"
+        - "Theme Comparison"
+        - "Terminal Preview"
+        - "Config Editor"
+        - "Config Import and Export"
+        - "Bookmarks and Browser Storage"
+        - "Accessibility"
+        - "Build and Deployment"
+        - "Documentation"
+        - "Other"
+    validations:
+      required: true
+  - type: "textarea"
+    id: "problem"
+    attributes:
+      label: "Problem or Use Case"
+      description: "Describe the task you cannot complete today and who would benefit."
+    validations:
+      required: true
+  - type: "textarea"
+    id: "solution"
+    attributes:
+      label: "Proposed Change"
+      description: "Describe the behavior or interface you would like."
+    validations:
+      required: true
+  - type: "textarea"
+    id: "success"
+    attributes:
+      label: "Acceptance Criteria"
+      description: "What observable outcome would make this request complete?"
+    validations:
+      required: true
+  - type: "textarea"
+    id: "alternatives"
+    attributes:
+      label: "Alternatives and Workarounds"
+      description: "Describe other approaches you considered or use today."
+    validations:
+      required: false
+  - type: "textarea"
+    id: "context"
+    attributes:
+      label: "Additional Context"
+      description: "Include examples, mockups, or relevant Ghostty documentation."
+    validations:
+      required: false
