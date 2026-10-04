@@ -10,6 +10,8 @@
     "build": "pnpm themes:refresh && vite build",
     "preview": "vite preview",
     "test": "vitest run",
+    "test:browser": "playwright test",
+    "benchmark:catalog": "node scripts/benchmark-theme-strip.js",
     "format": "oxfmt --write 'src/**/*' 'scripts/**/*' 'tests/**/*' '.github/**/*' '*.js' package.json '.ox*rc.json' '*.md'",
     "format:check": "oxfmt --check 'src/**/*' 'scripts/**/*' 'tests/**/*' '.github/**/*' '*.js' package.json '.ox*rc.json' '*.md'",
     "themes:refresh": "node scripts/refresh-themes.js",
@@ -24,6 +26,7 @@
     "pnpm": ">=10"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@vitejs/plugin-react": "^6.1.1",
     "oxfmt": "^0.71.0",
     "oxlint": "^1.86.0",
@@ -33,6 +36,7 @@
   "type": "module",
   "dependencies": {
     "@base-ui/react": "^1.8.0",
+    "@tanstack/react-virtual": "^3.14.13",
     "lucide-react": "^1.50.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0"

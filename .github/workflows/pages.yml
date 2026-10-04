@@ -40,10 +40,37 @@ jobs:
         with:
           path: dist
 
+  browser:
+    name: Catalog browser regressions
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: "22"
+      - name: Install pnpm
+        run: npm install --global pnpm@12.8.1
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Install browser dependencies
+        run: pnpm exec playwright install --with-deps chromium firefox
+      - name: Check catalog interactions in Chromium and Firefox
+        run: pnpm test:browser
+      - name: Upload catalog screenshots and browser failure artifacts
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: catalog-browser-artifacts
+          path: test-results/
+          retention-days: 7
+
   deploy:
     name: Deploy to GitHub Pages
     if: github.event_name != 'pull_request'
-    needs: build
+    needs: [build, browser]
     runs-on: ubuntu-latest
     permissions:
       pages: write
