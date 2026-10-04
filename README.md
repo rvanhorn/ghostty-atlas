@@ -4,7 +4,7 @@ Browse Ghostty themes, compare terminal palettes, and build a configuration with
 
 [Live app](https://rvanhorn.github.io/ghostty-atlas/) · [Contributing](CONTRIBUTING.md) · [Commit guide](COMMIT.md)
 
-## What you can do
+## What You Can Do
 
 - Search themes by name or catalog number. `7` matches names and numbers containing `7`; `#7` selects catalog number 7 exactly.
 - Combine appearance, palette, contrast, and saved-theme filters.
@@ -15,7 +15,7 @@ Browse Ghostty themes, compare terminal palettes, and build a configuration with
 
 The app uses React, Base UI, Vite, and bundled Geist fonts. Theme previews retain each terminal palette; the app interface has its own dark palette.
 
-## Run locally
+## Run Locally
 
 Use Node.js 22.13 or later and pnpm 12.8.1, the version recorded in `package.json`.
 
@@ -42,7 +42,7 @@ Open <http://127.0.0.1:5173>. For another port, run `pnpm dev --port 5191`. Inst
 
 `pnpm check` refreshes once before validation. There is no refresh after checks pass. A failed download or check stops the command.
 
-## Theme catalog
+## Theme Catalog
 
 [`src/data/themes.js`](src/data/themes.js) contains the catalog served to visitors. Refresh downloads the Ghostty files from [iTerm2 Color Schemes](https://github.com/mbadolato/iTerm2-Color-Schemes), the [upstream source used by Ghostty](https://ghostty.org/docs/features/theme).
 
@@ -75,7 +75,7 @@ pnpm preview --port 4173
 
 Open <http://127.0.0.1:4173/ghostty-atlas/>. Other static hosts can publish `dist/` after `pnpm build`. Clipboard access requires HTTPS or localhost.
 
-## Storage and preview limits
+## Storage and Preview Limits
 
 Bookmarks and comparison theme names are stored in each visitor's browser local storage. Config contents and drafts remain in tab memory and are lost on reload. Atlas has no backend, database, or account system; it does not write directly to a visitor's Ghostty installation.
 
@@ -83,7 +83,7 @@ The preview is a static sample rather than an interactive terminal. Fonts depend
 
 Import files are limited to 256 KB. Unknown settings are preserved, and invalid editable values block export until corrected. An unknown theme expression stays in the config while a labeled fallback palette is previewed.
 
-## Repository layout
+## Repository Layout
 
 | Path                       | Contents                                                                   |
 | -------------------------- | -------------------------------------------------------------------------- |

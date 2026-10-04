@@ -1,4 +1,4 @@
-# Commit guide
+# Commit Guide
 
 This repository uses Conventional Commit headers and plain-English bodies. The writing guidance follows the dotfiles project's preference for complete sentences, one topic per sentence, and no assistant attribution.
 
@@ -47,7 +47,7 @@ Keep hash-prefixed queries available for exact number lookup.
 
 Do not claim validation that was not run. Omit AI attribution, generated-by text, and assistant coauthor trailers.
 
-## Commit scope and checks
+## Commit Scope and Checks
 
 Keep one concern per commit, including its supporting tests and documentation. Do not separate a rename from the import changes that make it work. Review `git diff --cached` before committing.
 
@@ -55,7 +55,7 @@ The pre-commit hook refreshes themes, formats the generated file, and runs lint,
 
 The project has no commit-message enforcement hook; this file is the writing convention. Normal commits use the current timestamp. A reconstructed history may use earlier author and committer dates only when the repository owner explicitly requests it.
 
-## Breaking changes
+## Breaking Changes
 
 Use `!` after the scope and explain the incompatible behavior in a `BREAKING CHANGE:` footer.
 
