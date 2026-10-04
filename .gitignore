@@ -1,4 +1,24 @@
-node_modules/
+# Dependencies and package manager caches
+node_modules
+.pnpm-store/
+
+# Build output and test coverage
 dist/
-.DS_Store
+coverage/
+.vite/
+
+# Local environment values; keep documented examples
+.env
+.env.*
+!.env.example
+
+# Logs and interrupted catalog refreshes
 *.log
+/src/data/themes.js.tmp
+
+# Operating system and editor files
+.DS_Store
+.idea/
+*.swp
+*.swo
+*~
