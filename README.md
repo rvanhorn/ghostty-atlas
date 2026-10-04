@@ -34,9 +34,10 @@ Open <http://127.0.0.1:5173>. For another port, run `pnpm dev --port 5191`. Inst
 | `pnpm themes:refresh` | Download the current upstream Ghostty themes.                             |
 | `pnpm build`          | Refresh themes and build the static site into `dist/`.                    |
 | `pnpm preview`        | Serve the production build locally; stop dev first or use another port.   |
-| `pnpm test`           | Run the Node.js test suite.                                               |
-| `pnpm lint`           | Run ESLint.                                                               |
-| `pnpm format`         | Format source, tests, workflow, and documentation.                        |
+| `pnpm test`           | Run the Vitest suite once.                                                |
+| `pnpm test:watch`     | Run Vitest in watch mode while editing.                                   |
+| `pnpm lint`           | Run Oxlint.                                                               |
+| `pnpm format`         | Format source, tests, workflow, and documentation with Oxfmt.             |
 | `pnpm check`          | Refresh and format the catalog, lint, test, build, then check formatting. |
 | `pnpm hooks:install`  | Enable the pre-commit hook in an existing checkout.                       |
 

@@ -14,6 +14,7 @@ coverage/
 
 # Logs and interrupted catalog refreshes
 *.log
+docs/
 /src/data/themes.js.tmp
 
 # Operating system and editor files

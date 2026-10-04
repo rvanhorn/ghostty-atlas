@@ -26,7 +26,9 @@ Pull requests run the same checks in GitHub Actions. They do not publish the app
 
 ## Development Workflow
 
-Use `pnpm dev` while editing. Run focused tests during iteration, such as `node --test tests/theme-catalog.test.js`. Run `pnpm lint` after code changes and `pnpm format` when formatting needs correction.
+Use `pnpm dev` while editing. Run focused tests during iteration, such as `pnpm test tests/theme-catalog.test.js`. Use `pnpm test:watch` for Vitest watch mode. Tests use explicit imports from `vitest` and run in Node; the Vite app root remains `src/`, while test discovery starts at the repository root. Run `pnpm lint` (Oxlint) after code changes and `pnpm format` (Oxfmt) when formatting needs correction.
+
+Oxlint retains the core JavaScript checks and the available native React Hooks, React Compiler, and Fast Refresh checks. The former React Compiler `config` and `gating` rules have no native equivalents; this project has no React Compiler configuration or gating setup. Duplicate parameters and legacy octal syntax are rejected by the module parser. Oxfmt keeps the existing 80-column style and uses the same configuration for the generated theme catalog.
 
 The pre-commit hook runs `pnpm format` to fix formatting, then `pnpm check`: refresh and format the generated catalog, lint, tests, production build, and formatting checks. After success it stages `src/data/themes.js`, so an unrelated change can also include an upstream catalog update. Review that generated change when preparing the commit. The hook does not stage other source changes; review and stage any formatting corrections before committing. A failure stops the commit; fix the issue, stage the correction, and try again. No refresh happens after validation.
 

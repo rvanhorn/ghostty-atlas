@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { format } from "prettier";
+import { format } from "oxfmt";
 import { loadUpstreamThemes } from "./theme-source.js";
 
 const themeDirectory = process.argv[2] || process.env.GHOSTTY_THEMES_DIR;
@@ -192,10 +192,19 @@ const serializedThemes = JSON.stringify(themes, null, 2).replaceAll(
   "<",
   "\\u003c",
 );
-const output = await format(
-  `// Bundled Ghostty theme catalog. Refresh with pnpm themes:refresh.\n// Source: ${revision}\nexport const themes = ${serializedThemes};\n\nexport const findTheme = (name) => themes.find((theme) => theme.name === name);\n`,
-  { parser: "babel" },
+const formatConfig = JSON.parse(
+  fs.readFileSync(new URL("../.oxfmtrc.json", import.meta.url), "utf8"),
 );
+const { code: output, errors } = await format(
+  outputFile,
+  `// Bundled Ghostty theme catalog. Refresh with pnpm themes:refresh.\n// Source: ${revision}\nexport const themes = ${serializedThemes};\n\nexport const findTheme = (name) => themes.find((theme) => theme.name === name);\n`,
+  formatConfig,
+);
+if (errors.length) {
+  throw new Error(
+    `Theme catalog formatting failed: ${errors.map(({ message }) => message).join("; ")}`,
+  );
+}
 fs.writeFileSync(`${outputFile}.tmp`, output);
 fs.renameSync(`${outputFile}.tmp`, outputFile);
 console.log(`Saved ${themes.length} Ghostty themes to ${outputFile}`);

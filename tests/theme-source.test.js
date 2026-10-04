@@ -1,4 +1,4 @@
-import test from "node:test";
+import { test } from "vitest";
 import assert from "node:assert/strict";
 import { loadUpstreamThemes } from "../scripts/theme-source.js";
 

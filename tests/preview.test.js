@@ -1,4 +1,4 @@
-import test from "node:test";
+import { test } from "vitest";
 import assert from "node:assert/strict";
 import { fields } from "../src/features/config/fields.js";
 import { previewSupport } from "../src/features/config/preview-support.js";
