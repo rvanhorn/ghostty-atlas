@@ -1,6 +1,7 @@
 import { ArrowDownUp, Columns2, ListFilter, Search, X } from "lucide-react";
 import { Button } from "./ui/button.jsx";
 import brandMark from "../assets/branding/ghostty-atlas-mark.png";
+import { version } from "../../package.json";
 
 export const AppHeader = ({
   compareEnabled,
@@ -28,8 +29,10 @@ export const AppHeader = ({
         width={32}
         height={32}
       />
-      <span>
-        Ghostty <span className="brand-subtitle">Atlas</span>
+      <span className="brand-name">
+        Ghostty
+        <span className="brand-subtitle">Atlas</span>
+        <span className="brand-version">v{version}</span>
       </span>
     </Button>
     <div className="header-center">

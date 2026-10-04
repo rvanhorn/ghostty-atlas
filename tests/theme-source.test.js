@@ -50,3 +50,26 @@ test("refresh rejects incomplete listings and download failures", async () => {
     /Theme download failed \(503\)/,
   );
 });
+
+test("refresh authenticates only the API listing when a token is available", async () => {
+  for (const token of ["test-token", ""]) {
+    const requests = [];
+    await loadUpstreamThemes(
+      async (url, options) => {
+        requests.push({ url, headers: options.headers });
+        return url.includes("api.github.com")
+          ? Response.json(listing)
+          : new Response("background = #191c24\n");
+      },
+      { token },
+    );
+    assert.equal(
+      requests[0].headers.Authorization,
+      token ? `Bearer ${token}` : undefined,
+    );
+    for (const request of requests.slice(1)) {
+      assert.ok(request.url.startsWith("https://raw.githubusercontent.com/"));
+      assert.equal(request.headers.Authorization, undefined);
+    }
+  }
+});

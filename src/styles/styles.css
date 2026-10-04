@@ -159,9 +159,20 @@ a {
   height: 32px;
   object-fit: contain;
 }
+.brand-name {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
 .brand-subtitle {
-  font-weight: 400;
+  color: var(--accent);
+}
+.brand-version {
+  margin-left: 2px;
   color: var(--muted);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0;
 }
 .search-control {
   display: flex;

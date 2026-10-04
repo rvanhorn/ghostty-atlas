@@ -2,6 +2,20 @@
 
 All notable changes to Ghostty Atlas are documented here, grouped by release.
 
+## 1.1.0 - 2026-10-04
+
+### Changed
+
+- Virtualized the horizontal theme catalog so only the visible cards and a small surrounding range are mounted, improving initial rendering and performance with large catalogs.
+- Preserved keyboard navigation, focus, selected-theme scrolling, bookmarks, and comparison customization across virtualized cards and responsive layouts.
+- Displayed the app version after Atlas in the site navigation and applied the accent color to Atlas.
+- Added optional `GITHUB_TOKEN` authentication for the upstream theme API listing to avoid the lower anonymous rate limit. GitHub Pages checks supply the workflow token automatically; theme file downloads remain unauthenticated.
+
+### Added
+
+- Chromium and Firefox browser regression coverage for catalog scrolling, keyboard navigation, focus, responsive sizing, bookmarks, and comparison customization.
+- A catalog benchmark and recorded measurements for the bundled catalog and a larger synthetic catalog.
+
 ## 1.0.0 - 2026-10-04
 
 Initial release of the browser-based Ghostty theme catalog, comparison tool, and configuration editor.
