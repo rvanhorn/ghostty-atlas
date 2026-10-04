@@ -1,0 +1,39 @@
+{
+  "name": "ghostty-atlas",
+  "version": "1.0.0",
+  "private": true,
+  "packageManager": "pnpm@12.8.1",
+  "description": "Ghostty theme catalog, comparison, and lossless config editor with React and Base UI",
+  "scripts": {
+    "dev": "vite",
+    "start": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "node --test tests/*.test.js",
+    "format": "prettier --write src tests *.js package.json",
+    "format:check": "prettier --check src tests *.js package.json",
+    "lint": "eslint .",
+    "check": "pnpm lint && pnpm test && pnpm build && pnpm format:check"
+  },
+  "engines": {
+    "node": ">=22.13",
+    "pnpm": ">=10"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@vitejs/plugin-react": "^6.1.1",
+    "eslint": "^10.12.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.7",
+    "globals": "^17.13.0",
+    "prettier": "^3.9.9",
+    "vite": "^8.3.2"
+  },
+  "type": "module",
+  "dependencies": {
+    "@base-ui/react": "^1.8.0",
+    "lucide-react": "^1.50.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  }
+}
