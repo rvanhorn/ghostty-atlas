@@ -28,18 +28,20 @@ Open <http://127.0.0.1:5173>. For another port, run `pnpm dev --port 5191`. Inst
 
 ## Commands
 
-| Command               | Purpose                                                                   |
-| --------------------- | ------------------------------------------------------------------------- |
-| `pnpm dev`            | Start the development server using the bundled catalog.                   |
-| `pnpm themes:refresh` | Download the current upstream Ghostty themes.                             |
-| `pnpm build`          | Refresh themes and build the static site into `dist/`.                    |
-| `pnpm preview`        | Serve the production build locally; stop dev first or use another port.   |
-| `pnpm test`           | Run the Vitest suite once.                                                |
-| `pnpm test:watch`     | Run Vitest in watch mode while editing.                                   |
-| `pnpm lint`           | Run Oxlint.                                                               |
-| `pnpm format`         | Format source, tests, workflow, and documentation with Oxfmt.             |
-| `pnpm check`          | Refresh and format the catalog, lint, test, build, then check formatting. |
-| `pnpm hooks:install`  | Enable the pre-commit hook in an existing checkout.                       |
+| Command                  | Purpose                                                                   |
+| ------------------------ | ------------------------------------------------------------------------- |
+| `pnpm dev`               | Start the development server using the bundled catalog.                   |
+| `pnpm themes:refresh`    | Download the current upstream Ghostty themes.                             |
+| `pnpm build`             | Refresh themes and build the static site into `dist/`.                    |
+| `pnpm preview`           | Serve the production build locally; stop dev first or use another port.   |
+| `pnpm test`              | Run the Vitest suite once.                                                |
+| `pnpm test:browser`      | Check catalog interactions in Chromium and Firefox with Playwright.       |
+| `pnpm benchmark:catalog` | Measure catalog rendering, search, DOM size, and scrolling.               |
+| `pnpm test:watch`        | Run Vitest in watch mode while editing.                                   |
+| `pnpm lint`              | Run Oxlint.                                                               |
+| `pnpm format`            | Format source, tests, workflow, and documentation with Oxfmt.             |
+| `pnpm check`             | Refresh and format the catalog, lint, test, build, then check formatting. |
+| `pnpm hooks:install`     | Enable the pre-commit hook in an existing checkout.                       |
 
 `pnpm check` refreshes once before validation. There is no refresh after checks pass. A failed download or check stops the command.
 
@@ -61,7 +63,7 @@ A directory argument or `GHOSTTY_THEMES_DIR` overrides the upstream download. Le
 
 [`.github/workflows/pages.yml`](.github/workflows/pages.yml) checks pull requests and deploys pushes to `main`. A manual run is also available in the Actions tab.
 
-The build job installs the locked dependencies, refreshes themes, and runs `pnpm check`. Only a successful build is uploaded and deployed. Deployment permissions are limited to the deployment job. The workflow uses GitHub's Pages artifact and deployment actions; it does not commit build output or refreshed files back to the repository.
+The build job installs the locked dependencies, refreshes themes, and runs `pnpm check`. A separate browser job checks catalog interactions in Chromium and Firefox using the bundled catalog. Deployment requires both jobs to pass. Deployment permissions are limited to the deployment job. The workflow uses GitHub's Pages artifact and deployment actions; it does not commit build output or refreshed files back to the repository. See [CONTRIBUTING.md](CONTRIBUTING.md) for browser setup and catalog performance measurements.
 
 In repository **Settings → Pages**, select **GitHub Actions** as the publishing source. The project URL is <https://rvanhorn.github.io/ghostty-atlas/>.
 
