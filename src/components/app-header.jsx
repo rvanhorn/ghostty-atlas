@@ -1,4 +1,11 @@
-import { ArrowDownUp, Columns2, ListFilter, Search, X } from "lucide-react";
+import {
+  ArrowDownUp,
+  Columns2,
+  ListFilter,
+  Search,
+  Share2,
+  X,
+} from "lucide-react";
 import { Button } from "./ui/button.jsx";
 import brandMark from "../assets/branding/ghostty-atlas-mark.png";
 import { version } from "../../package.json";
@@ -13,6 +20,7 @@ export const AppHeader = ({
   themeCount,
   onHome,
   onCompare,
+  onShare,
   onTransfer,
 }) => (
   <header className="app-header">
@@ -83,6 +91,10 @@ export const AppHeader = ({
       </Button>
     </div>
     <div className="header-right">
+      <Button variant="quiet" onClick={onShare}>
+        <Share2 size={16} />
+        Share
+      </Button>
       <Button variant="quiet" onClick={onTransfer}>
         <ArrowDownUp size={16} />
         Import / Export

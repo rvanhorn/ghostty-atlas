@@ -9,6 +9,7 @@ Browse Ghostty themes, compare terminal palettes, and build a configuration with
 - Search themes by name or catalog number. `7` matches names and numbers containing `7`; `#7` selects catalog number 7 exactly.
 - Combine appearance, palette, contrast, and saved-theme filters.
 - Compare two themes with independent previews and lock either side while browsing.
+- Share a link to the current theme, or to a two-theme comparison, with the selected preview sample.
 - Adjust typography, background, layout, cursor, behavior, and macOS settings.
 - Import an existing config without losing untouched comments, unknown directives, or line endings.
 - Copy or download the result, or download an installation script that backs up the existing config before replacing it.
@@ -87,6 +88,8 @@ Open <http://127.0.0.1:4173/ghostty-atlas/>. Other static hosts can publish `dis
 
 Bookmarks and comparison theme names are stored in each visitor's browser local storage under `ghostty-atlas`. The latest unfinished config is stored as a draft under `ghostty-atlas-draft`, and named presets under `ghostty-atlas-presets`, both in this browser's local storage only. On return, Atlas offers to restore or discard the draft, including its imported source, pending values, and values that still need fixing. Each record carries a version; Atlas leaves records from another version untouched, and works without saving when storage is unavailable or full. **Clear Saved Configs** in the Presets tab of Import / Export removes the draft and every preset but keeps bookmarks. Atlas has no backend, database, or account system; it does not write directly to a visitor's Ghostty installation.
 
+**Share** builds a link at the deployed path with theme names and the preview sample in the query string: `?theme=Nord&sample=code` for one theme, or `?left=Nord&right=Dracula&sample=code` for a comparison. Links never include config text, unknown directives, or file names. Atlas removes these values from the address once it reads them, names any unknown theme or sample it ignored, and still offers a stored draft; restoring that draft keeps its own theme and offers to apply the shared one. When clipboard access fails, the link stays selected in a read-only field for manual copying.
+
 The preview is a static sample rather than an interactive terminal. Fonts depend on browser availability. Font size and padding use logical pixels; contrast, blur, transparency, padding balance, and window chrome approximate native rendering. Reduced motion disables cursor blinking. Controls marked **Config Only** affect the exported config without changing the sample. Controls marked **Approximate** describe browser simulations.
 
 Import files are limited to 256 KB. Unknown settings are preserved, and invalid editable values block export until corrected. An unknown theme expression stays in the config while a labeled fallback palette is previewed.
@@ -99,7 +102,8 @@ Import files are limited to 256 KB. Unknown settings are preserved, and invalid 
 | `src/features/gallery/`    | Catalog filters and the scrolling theme strip.                             |
 | `src/features/comparison/` | Comparison state and paired previews.                                      |
 | `src/features/config/`     | Lossless config parsing, validation, settings, drafts, presets, transfer.  |
-| `src/shared/`              | Browser preferences and theme numbering and search.                        |
+| `src/features/share/`      | Shared link parsing and building, the share dialog, and link notices.      |
+| `src/shared/`              | Browser preferences, preview samples, and theme numbering and search.      |
 | `src/data/themes.js`       | Generated theme catalog.                                                   |
 | `src/styles/`              | UI tokens and component styles.                                            |
 | `scripts/`                 | Theme refresh and hook installation.                                       |

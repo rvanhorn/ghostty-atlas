@@ -6,9 +6,15 @@ import {
 } from "./config-state.js";
 import { parseImport } from "./validation.js";
 
-export const useConfig = () => {
-  const [state, dispatch] = useReducer(configReducer, undefined, () =>
-    createConfigState(),
+// A theme from a shared link starts the config without counting as a change.
+export const useConfig = (initialThemeName = null) => {
+  const [state, dispatch] = useReducer(
+    configReducer,
+    initialThemeName,
+    (themeName) =>
+      themeName
+        ? configReducer(createConfigState(), { type: "theme", themeName })
+        : createConfigState(),
   );
   const [initialState] = useState(state);
   const exportedConfig = useMemo(

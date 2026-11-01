@@ -3,6 +3,7 @@ import { Button } from "../../components/ui/button.jsx";
 
 export const DraftRecoveryDialog = ({
   draft,
+  sharedThemeName,
   onRestore,
   onDiscard,
   onLater,
@@ -28,6 +29,13 @@ export const DraftRecoveryDialog = ({
           If you decide later, the draft stays saved until you change the
           config.
         </p>
+        {sharedThemeName && (
+          <p className="transfer-description">
+            The shared link opened {sharedThemeName}. Restoring brings back the
+            draft with its own theme, and Atlas then offers to apply{" "}
+            {sharedThemeName} to it.
+          </p>
+        )}
         <div className="transfer-actions">
           <Button onClick={onDiscard}>Discard Draft</Button>
           <Button variant="primary" onClick={onRestore}>

@@ -9,6 +9,8 @@ All notable changes to Ghostty Atlas are documented here, grouped by release.
 - Draft recovery: Atlas keeps the latest unfinished config in this browser's local storage and offers to restore or discard it on return. A restored draft keeps its imported source, comments, unknown directives, line endings, and pending values, and invalid values still block export.
 - Named config presets in a new Presets tab of Import / Export. Presets can be saved, loaded, renamed, and deleted; loading a preset over unsaved work offers to save that work as a preset or discard it.
 - **Clear Saved Configs** removes the stored draft and presets while keeping bookmarks. Versioned storage records from another Atlas version are left untouched, and unavailable or full storage leaves the editor working without saving.
+- **Share** creates a link to the current theme or two-theme comparison with the preview sample, using theme names rather than catalog numbers and keeping the GitHub Pages project path. Links exclude config text, unknown directives, and file names, and a read-only link field stays selected when clipboard access fails.
+- Opening a shared link applies its theme, or opens the comparison with its sample, and names any unknown theme, sample, or malformed part it ignored. A stored draft is still offered; restoring it keeps the draft's theme and offers to apply the shared one, and saved presets are untouched.
 
 ### Fixed
 

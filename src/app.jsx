@@ -16,8 +16,16 @@ import { ComparisonView } from "./features/comparison/comparison-view.jsx";
 import { defaultFilters, filterThemes } from "./features/gallery/catalog.js";
 import { updateComparison } from "./features/comparison/comparison-state.js";
 import { DraftRecoveryDialog } from "./features/config/draft-recovery-dialog.jsx";
+import { restoreConfigState } from "./features/config/config-state.js";
 import { useConfig } from "./features/config/use-config.js";
 import { useConfigStorage } from "./features/config/use-config-storage.js";
+import { ShareDialog } from "./features/share/share-dialog.jsx";
+import { ShareNotice } from "./features/share/share-notice.jsx";
+import {
+  describeIgnored,
+  parseShareLink,
+  removeShareParams,
+} from "./features/share/share-link.js";
 import { readPreferences, writePreferences } from "./shared/preferences.js";
 
 const getStorage = () => {
@@ -29,18 +37,33 @@ const getStorage = () => {
 };
 
 export const App = () => {
+  const [sharedLink] = useState(() => parseShareLink(window.location.search));
   const [preferences] = useState(() => readPreferences(getStorage()));
   const [savedThemes, setSavedThemes] = useState(preferences.saved);
   const [comparison, dispatchComparison] = useReducer(
     updateComparison,
     preferences,
     (initial) => ({
-      left: { themeName: initial.leftTheme, locked: false },
-      right: { themeName: initial.rightTheme, locked: false },
+      left: {
+        themeName: sharedLink?.left || initial.leftTheme,
+        locked: false,
+      },
+      right: {
+        themeName: sharedLink?.right || initial.rightTheme,
+        locked: false,
+      },
     }),
   );
-  const [compareEnabled, setCompareEnabled] = useState(false);
-  const [sample, setSample] = useState("shell");
+  const [compareEnabled, setCompareEnabled] = useState(
+    Boolean(sharedLink?.comparing),
+  );
+  const [sample, setSample] = useState(sharedLink?.sample || "shell");
+  const [shareOpen, setShareOpen] = useState(false);
+  const [ignoredNotice, setIgnoredNotice] = useState(() =>
+    describeIgnored(sharedLink?.ignored ?? []),
+  );
+  // A shared theme the user set aside by restoring a draft with another theme.
+  const [heldSharedTheme, setHeldSharedTheme] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [filters, setFilters] = useState(defaultFilters);
@@ -48,7 +71,7 @@ export const App = () => {
   const [transferSession, setTransferSession] = useState(0);
   const searchRef = useRef(null);
   const workspaceRef = useRef(null);
-  const config = useConfig();
+  const config = useConfig(sharedLink?.theme);
   const [storage] = useState(getStorage);
   const configStorage = useConfigStorage(config, storage);
   const setTheme = config.setTheme;
@@ -83,6 +106,30 @@ export const App = () => {
     setSearchQuery("");
     setFilters(defaultFilters);
   };
+  const restoreDraft = () => {
+    const draftTheme = restoreConfigState(
+      configStorage.recoverableDraft,
+    ).document.get("theme");
+    configStorage.restoreDraft();
+    if (sharedLink?.theme && sharedLink.theme !== draftTheme)
+      setHeldSharedTheme(sharedLink.theme);
+  };
+  const shareNotice = [
+    heldSharedTheme &&
+      `Your restored draft kept its own theme, so ${heldSharedTheme} from the shared link was not applied.`,
+    ignoredNotice,
+  ]
+    .filter(Boolean)
+    .join(" ");
+  // Once read, the shared values leave the address so a reload keeps the user's own work.
+  useEffect(() => {
+    if (!sharedLink) return;
+    window.history.replaceState(
+      window.history.state,
+      "",
+      removeShareParams(window.location.href),
+    );
+  }, [sharedLink]);
   useEffect(() => {
     writePreferences(getStorage(), savedThemes, comparison);
   }, [savedThemes, comparison]);
@@ -115,9 +162,24 @@ export const App = () => {
           searchRef.current?.focus();
         }}
         onCompare={() => setComparisonVisible(!compareEnabled, activeThemeName)}
+        onShare={() => setShareOpen(true)}
         onTransfer={() => setTransferOpen(true)}
       />
       <main ref={workspaceRef} className="workspace" aria-label="Theme Studio">
+        {shareNotice && (
+          <ShareNotice
+            message={shareNotice}
+            actionLabel={heldSharedTheme && `Apply ${heldSharedTheme}`}
+            onAction={() => {
+              customizeTheme(findTheme(heldSharedTheme));
+              setHeldSharedTheme(null);
+            }}
+            onDismiss={() => {
+              setHeldSharedTheme(null);
+              setIgnoredNotice("");
+            }}
+          />
+        )}
         <FilterBar
           open={filtersOpen}
           filters={filters}
@@ -170,9 +232,24 @@ export const App = () => {
           if (compareEnabled) setComparisonVisible(false);
         }}
       />
+      <ShareDialog
+        open={shareOpen}
+        onOpenChange={setShareOpen}
+        shareState={
+          compareEnabled
+            ? {
+                comparing: true,
+                left: comparison.left.themeName,
+                right: comparison.right.themeName,
+                sample,
+              }
+            : { comparing: false, theme: activeThemeName, sample }
+        }
+      />
       <DraftRecoveryDialog
         draft={configStorage.recoverableDraft}
-        onRestore={configStorage.restoreDraft}
+        sharedThemeName={sharedLink?.theme}
+        onRestore={restoreDraft}
         onDiscard={configStorage.discardDraft}
         onLater={configStorage.postponeDraft}
       />

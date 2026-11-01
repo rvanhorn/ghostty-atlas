@@ -6,15 +6,10 @@ import { findTheme } from "../../data/themes.js";
 import { Button } from "../../components/ui/button.jsx";
 import { SegmentedControl } from "../../components/ui/segmented-control.jsx";
 import { TerminalPreview } from "../../components/terminal-preview.jsx";
+import { previewSamples } from "../../shared/preview-samples.js";
 import { SettingField } from "./setting-field.jsx";
 
 const categoryOptions = settingCategories.map(({ id, label }) => [id, label]);
-
-const sampleOptions = [
-  ["shell", "Shell"],
-  ["code", "Code"],
-  ["text", "Typography"],
-];
 
 export const SettingsWorkspace = ({
   config,
@@ -44,7 +39,7 @@ export const SettingsWorkspace = ({
             <SegmentedControl
               label="Preview Sample"
               value={sample}
-              options={sampleOptions}
+              options={previewSamples}
               onValueChange={onSampleChange}
             />
           </div>
