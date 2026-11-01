@@ -21,6 +21,7 @@ import { DraftRecoveryDialog } from "./features/config/draft-recovery-dialog.jsx
 import { restoreConfigState } from "./features/config/config-state.js";
 import { useConfig } from "./features/config/use-config.js";
 import { useConfigStorage } from "./features/config/use-config-storage.js";
+import { defaultTarget } from "./features/config/compatibility.js";
 import {
   fallbackThemeName,
   getThemeName,
@@ -86,6 +87,8 @@ export const App = () => {
   const configStorage = useConfigStorage(config, storage);
   // Which member of a light and dark pair the preview, theme strip, and share link use.
   const [previewAppearance, setPreviewAppearance] = useState("dark");
+  // The platform and Ghostty version the user plans to export for, for this session.
+  const [compatibilityTarget, setCompatibilityTarget] = useState(defaultTarget);
   const setTheme = config.setTheme;
   const themeValue = config.document.get("theme");
   const pairedTheme = parseThemeValue(themeValue).paired;
@@ -232,6 +235,7 @@ export const App = () => {
           config={config}
           previewAppearance={previewAppearance}
           onPreviewAppearanceChange={setPreviewAppearance}
+          compatibilityTarget={compatibilityTarget}
           sample={sample}
           onSampleChange={setSample}
           compareEnabled={compareEnabled}
@@ -262,6 +266,8 @@ export const App = () => {
         onImported={() => {
           if (compareEnabled) setComparisonVisible(false);
         }}
+        target={compatibilityTarget}
+        onTargetChange={setCompatibilityTarget}
       />
       <PaletteDialog
         theme={paletteTheme}

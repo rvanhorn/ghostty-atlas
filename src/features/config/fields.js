@@ -28,7 +28,7 @@ export const fields = [
     label: "Background Opacity",
     group: "appearance",
     type: "opacity",
-    help: "Text stays opaque. macOS requires a full restart; native fullscreen ignores transparency.",
+    help: "Text stays opaque. macOS native fullscreen ignores transparency.",
   },
   {
     key: "background-blur",
@@ -41,7 +41,7 @@ export const fields = [
       ["10", "Subtle · 10"],
       ["30", "Strong · 30"],
     ],
-    help: "Requires transparency. Supported by macOS and some Linux desktops.",
+    help: "Requires transparency.",
   },
   {
     key: "window-padding-x",
@@ -57,7 +57,7 @@ export const fields = [
     group: "appearance",
     type: "padding",
     placeholder: "Default",
-    help: "Points. Use one value for both sides, or top,bottom. Padding changes apply to new terminals.",
+    help: "Points. Use one value for both sides, or top,bottom.",
   },
   {
     key: "window-padding-balance",
@@ -156,7 +156,7 @@ export const fields = [
       ["tabs", "Integrated Tabs"],
       ["hidden", "Hidden"],
     ],
-    help: "macOS only. Integrated tabs follow the terminal background. Hidden removes the tab bar; new tabs open as windows. Style changes apply to new windows.",
+    help: "Integrated tabs follow the terminal background. Hidden removes the tab bar; new tabs open as windows.",
   },
   {
     key: "window-theme",
@@ -177,7 +177,7 @@ export const fields = [
     group: "macos",
     type: "text",
     placeholder: "System Default",
-    help: "One installed font family for window and tab titles. Also supported on Linux; browser availability may differ.",
+    help: "One installed font family for window and tab titles. Browser availability may differ.",
   },
   {
     key: "macos-window-buttons",
@@ -188,7 +188,7 @@ export const fields = [
       ["visible", "Visible"],
       ["hidden", "Hidden"],
     ],
-    help: "Show or hide the macOS traffic lights. Changes apply to new windows; a hidden titlebar always hides them.",
+    help: "Show or hide the macOS traffic lights. A hidden titlebar always hides them.",
   },
   {
     key: "macos-titlebar-proxy-icon",
@@ -199,7 +199,7 @@ export const fields = [
       ["visible", "Visible"],
       ["hidden", "Hidden"],
     ],
-    help: "macOS native titlebar only. Updates after the working directory changes. Tab colors, height and corner shape are managed by macOS.",
+    help: "Native titlebar only. Tab colors, height and corner shape are managed by macOS.",
   },
   {
     key: "macos-option-as-alt",
@@ -219,6 +219,6 @@ export const fields = [
     label: "Quit After Last Window",
     group: "macos",
     options: defaults,
-    help: "Also supported on Linux. macOS normally keeps the app running with no windows.",
+    help: "Ghostty Default keeps the app running with no windows on macOS and quits on Linux.",
   },
 ];

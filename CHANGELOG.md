@@ -18,10 +18,13 @@ All notable changes to Ghostty Atlas are documented here, grouped by release.
 - A palette button on each theme card opens the theme's window colors and labeled ANSI colors 0–15; selecting a color, by pointer or keyboard, copies its hex value.
 - **Find Similar Themes** ranks the other themes by how close their background, foreground, and ANSI colors are in the OKLab color space, with ties ordered by name. A **Sort** control in the filter bar also orders themes by background brightness or saturation in either direction. Sorting applies after search and filters narrow the list.
 - **ANSI Colors**, **Git Diff**, **Dense Log**, and **Terminal UI** preview samples. The ANSI sample labels all 16 colors, including bright variants, as text, bold text, and background blocks; the others show Git status, diff, and graph colors, leveled log output with a stack trace, and a box-drawn process monitor. Samples use bold, dim, italic, underline, and inverse text, both comparison sides show the same sample, and share links carry the new samples as `ansi`, `diff`, `log`, and `tui`.
+- **Review Changes** in the Export tab lists each added, removed, or modified setting with its removed and added lines, compared with the imported or starter config. Comments, unknown directives, untouched settings, and line endings are not listed, and an unchanged config is reported as having no changes.
+- A target platform (macOS or Linux) and Ghostty version (1.0 to 1.4), chosen by the user for the session, drive compatibility notes in the review and beside each setting: settings or values the target does not support, deprecated values, and when changes take effect, each linked to Ghostty's documentation. Atlas does not detect the installation and never changes or removes settings because of these notes.
 
 ### Changed
 
 - **Preview Sample** is a menu instead of a row of buttons so all seven samples fit at narrow widths.
+- Platform, version, and restart notes for settings now come from the compatibility notes for the chosen target instead of fixed help text.
 - The configuration preview applies the config's own `background`, `foreground`, `cursor-color`, `cursor-text`, `selection-background`, `selection-foreground`, and `palette` settings over the theme, as Ghostty does. Imported configs with these settings now preview the colors Ghostty shows; color names Atlas cannot read are listed and keep the theme color.
 
 ### Fixed

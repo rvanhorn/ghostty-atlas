@@ -4,6 +4,7 @@ import { Modal } from "../../components/ui/modal.jsx";
 import { Button } from "../../components/ui/button.jsx";
 import { SegmentedControl } from "../../components/ui/segmented-control.jsx";
 import { PresetsPanel } from "./presets-panel.jsx";
+import { ReviewPanel } from "./review-panel.jsx";
 import {
   createConfigScript,
   SCRIPT_COMMAND,
@@ -17,6 +18,8 @@ export const TransferDialog = ({
   config,
   configStorage,
   onImported,
+  target,
+  onTargetChange,
 }) => {
   const [mode, setMode] = useState("export");
   const [exportMode, setExportMode] = useState("raw");
@@ -105,9 +108,10 @@ export const TransferDialog = ({
         />
         {mode === "export" && (
           <SegmentedControl
-            label="Export Format"
+            label="Export View"
             value={exportMode}
             options={[
+              ["review", "Review Changes"],
               ["raw", "Raw"],
               ["command", "Command"],
             ]}
@@ -169,30 +173,42 @@ export const TransferDialog = ({
         </div>
       ) : (
         <div className="transfer-content">
-          <label className="transfer-label" htmlFor="export-source">
-            {exportMode === "command" ? "Install Script" : "Raw Configuration"}
-          </label>
-          {exportMode === "command" && (
-            <p className="transfer-description">
-              Backs up your existing config before replacing it.
-            </p>
+          {exportMode === "review" ? (
+            <ReviewPanel
+              config={config}
+              target={target}
+              onTargetChange={onTargetChange}
+            />
+          ) : (
+            <>
+              <label className="transfer-label" htmlFor="export-source">
+                {exportMode === "command"
+                  ? "Install Script"
+                  : "Raw Configuration"}
+              </label>
+              {exportMode === "command" && (
+                <p className="transfer-description">
+                  Backs up your existing config before replacing it.
+                </p>
+              )}
+              <textarea
+                id="export-source"
+                className="config-source"
+                aria-label={
+                  exportMode === "command"
+                    ? "Install Script Preview"
+                    : "Config to Export"
+                }
+                readOnly
+                value={
+                  exportMode === "command"
+                    ? createConfigScript(config.exportedConfig)
+                    : config.exportedConfig
+                }
+                spellCheck={false}
+              />
+            </>
           )}
-          <textarea
-            id="export-source"
-            className="config-source"
-            aria-label={
-              exportMode === "command"
-                ? "Install Script Preview"
-                : "Config to Export"
-            }
-            readOnly
-            value={
-              exportMode === "command"
-                ? createConfigScript(config.exportedConfig)
-                : config.exportedConfig
-            }
-            spellCheck={false}
-          />
           {exportMode === "command" && (
             <div className="transfer-command">
               <label className="transfer-label" htmlFor="script-command">
@@ -219,7 +235,7 @@ export const TransferDialog = ({
             {message}
           </p>
           <div className="transfer-actions">
-            {exportMode === "raw" && (
+            {exportMode !== "command" && (
               <Button disabled={config.hasErrors} onClick={copyConfig}>
                 <Copy size={14} />
                 Copy Config

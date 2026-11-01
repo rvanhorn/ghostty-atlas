@@ -9,6 +9,7 @@ import { SelectControl } from "../../components/ui/select.jsx";
 import { TerminalPreview } from "../../components/terminal-preview.jsx";
 import { previewSamples } from "../../shared/preview-samples.js";
 import { SettingField } from "./setting-field.jsx";
+import { checkSetting } from "./compatibility.js";
 import { ThemeModeControls } from "./theme-mode-controls.jsx";
 import { PaletteEditor } from "../palette/palette-editor.jsx";
 import { applyColorOverrides, readColorOverrides } from "../palette/palette.js";
@@ -25,6 +26,7 @@ export const SettingsWorkspace = ({
   config,
   previewAppearance,
   onPreviewAppearanceChange,
+  compatibilityTarget,
   sample,
   onSampleChange,
   compareEnabled,
@@ -113,6 +115,11 @@ export const SettingsWorkspace = ({
                           : undefined
                   }
                   value={config.getValue(field.key)}
+                  compatibility={checkSetting(
+                    field.key,
+                    config.document.values(field.key),
+                    compatibilityTarget,
+                  )}
                   error={config.errors[field.key]}
                   onChange={config.updateField}
                 />

@@ -1,5 +1,6 @@
 import { previewSupport } from "./preview-support.js";
 import { SelectControl } from "../../components/ui/select.jsx";
+import { FindingList } from "./review-panel.jsx";
 
 export const SettingField = ({
   field,
@@ -7,6 +8,7 @@ export const SettingField = ({
   error,
   onChange,
   previewRequirement,
+  compatibility = [],
 }) => {
   const support = previewSupport[field.key];
   const numeric = field.type === "number" || field.type === "opacity";
@@ -36,6 +38,11 @@ export const SettingField = ({
         </label>
         <p id={descriptionId} className={error ? "field-error" : "field-help"}>
           {error || field.help || "Leave empty to use the Ghostty Default."}
+          {compatibility.length > 0 && (
+            <span className="field-compat">
+              <FindingList findings={compatibility} />
+            </span>
+          )}
           {support.note && (
             <span className="field-preview-note">{support.note}</span>
           )}
