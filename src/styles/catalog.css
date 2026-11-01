@@ -147,6 +147,88 @@
   color: #ffffff;
   background: var(--tab-highlight);
 }
+.theme-card-palette.button {
+  position: absolute;
+  bottom: 8px;
+  right: 44px;
+  padding: 8px;
+  min-height: 32px;
+  border: 0;
+  color: var(--muted);
+}
+.theme-card--palette .theme-card-name {
+  padding-right: 72px;
+}
+.palette-group-title {
+  margin: 0 0 var(--space-2);
+  font-size: 16px;
+  font-weight: 600;
+}
+.palette-chips {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+/* Normal colors 0–7 fill the first column beside their bright 8–15 counterparts. */
+.palette-chips--ansi {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(8, auto);
+  grid-auto-flow: column;
+}
+.palette-chip {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  min-width: 0;
+  padding: 6px var(--space-2);
+  text-align: left;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+}
+.palette-chip:hover {
+  background: var(--hover);
+}
+.palette-chip:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+.palette-chip-swatch {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-control);
+  box-shadow: inset 0 0 0 1px #ffffff26;
+}
+.palette-chip-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+}
+.palette-chip-value {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex-shrink: 0;
+  font-family: "Geist Mono", monospace;
+  font-size: 14px;
+  color: var(--muted);
+}
+.palette-dialog .transfer-actions {
+  margin-top: var(--space-2);
+}
+@media (max-width: 550px) {
+  .palette-chips,
+  .palette-chips--ansi {
+    grid-template-columns: 1fr;
+    grid-template-rows: none;
+    grid-auto-flow: row;
+  }
+}
 .comparison-view {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

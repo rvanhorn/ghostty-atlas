@@ -9,6 +9,7 @@ export const Modal = ({
   description,
   closeLabel = "Close Import and Export",
   className = "",
+  finalFocus,
   children,
 }) => (
   <Dialog.Root
@@ -18,7 +19,10 @@ export const Modal = ({
   >
     <Dialog.Portal>
       <Dialog.Backdrop className="modal-backdrop" />
-      <Dialog.Popup className={`modal-popup ${className}`}>
+      <Dialog.Popup
+        className={`modal-popup ${className}`}
+        finalFocus={finalFocus}
+      >
         <div className="modal-heading">
           <div className="modal-heading-copy">
             <Dialog.Title className="modal-title">{title}</Dialog.Title>

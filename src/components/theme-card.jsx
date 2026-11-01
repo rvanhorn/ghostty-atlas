@@ -1,12 +1,22 @@
 import { memo } from "react";
-import { Bookmark, BookmarkCheck } from "lucide-react";
+import { Bookmark, BookmarkCheck, Palette } from "lucide-react";
 import { TerminalPreview } from "./terminal-preview.jsx";
 import { Button } from "./ui/button.jsx";
 import { getThemeLabel } from "../shared/theme-catalog.js";
 
 export const ThemeCard = memo(
-  ({ theme, sample, selected, saved, onSelect, onToggleSaved }) => (
-    <article className={`theme-card ${selected ? "theme-card--selected" : ""}`}>
+  ({
+    theme,
+    sample,
+    selected,
+    saved,
+    onSelect,
+    onToggleSaved,
+    onShowPalette,
+  }) => (
+    <article
+      className={`theme-card ${selected ? "theme-card--selected" : ""} ${onShowPalette ? "theme-card--palette" : ""}`}
+    >
       <button
         type="button"
         className="theme-card-pick"
@@ -18,6 +28,17 @@ export const ThemeCard = memo(
         <TerminalPreview theme={theme} sample={sample} compact />
         <span className="theme-card-name">{getThemeLabel(theme.name)}</span>
       </button>
+      {onShowPalette && (
+        <Button
+          variant="quiet"
+          className="theme-card-palette"
+          onClick={() => onShowPalette(theme)}
+          aria-label={`Show ${theme.name} Palette`}
+          title="Palette and Similar Themes"
+        >
+          <Palette size={14} />
+        </Button>
+      )}
       <Button
         variant="quiet"
         className="theme-card-save"

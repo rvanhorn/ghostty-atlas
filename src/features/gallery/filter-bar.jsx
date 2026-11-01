@@ -2,6 +2,7 @@ import { Switch } from "@base-ui/react/switch";
 import { SelectControl } from "../../components/ui/select.jsx";
 import { Button } from "../../components/ui/button.jsx";
 import { countActiveFilters } from "./catalog.js";
+import { getSortOptions } from "./discovery.js";
 
 const filterDefinitions = [
   {
@@ -40,6 +41,8 @@ const filterDefinitions = [
 export const FilterBar = ({
   filters,
   onFilterChange,
+  sort,
+  onSortChange,
   onReset,
   resultCount,
   open,
@@ -81,6 +84,16 @@ export const FilterBar = ({
           </Switch.Root>
           Saved Only
         </label>
+        <div className="filter-bar-field">
+          <label htmlFor="theme-sort">Sort</label>
+          <SelectControl
+            id="theme-sort"
+            label="Sort Themes"
+            options={getSortOptions(sort)}
+            value={sort.order}
+            onValueChange={(order) => onSortChange({ ...sort, order })}
+          />
+        </div>
         <div className="filter-bar-summary">
           <Button variant="quiet" onClick={onReset} disabled={!activeCount}>
             Reset Filters

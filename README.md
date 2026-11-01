@@ -8,6 +8,8 @@ Browse Ghostty themes, compare terminal palettes, and build a configuration with
 
 - Search themes by name or catalog number. `7` matches names and numbers containing `7`; `#7` selects catalog number 7 exactly.
 - Combine appearance, palette, contrast, and saved-theme filters.
+- Sort themes by background brightness or saturation in either direction, or find themes similar to one you like.
+- Inspect a theme's window colors and labeled ANSI colors 0–15, and copy any hex value.
 - Compare two themes with independent previews and lock either side while browsing.
 - Share a link to the current theme, or to a two-theme comparison, with the selected preview sample.
 - Configure separate light and dark themes, which Ghostty switches with the system appearance, and preview either one.
@@ -100,17 +102,25 @@ Import files are limited to 256 KB. Unknown settings are preserved, and invalid 
 
 **Palette** edits are written to the config as Ghostty color settings (`background`, `foreground`, `cursor-color`, `cursor-text`, `selection-background`, `selection-foreground`, and `palette = N=#rrggbb`), which Ghostty applies over any theme, including both members of a light and dark pair. The preview applies the same settings from an imported config. Atlas reads hex colors only; X11 color names stay in the config and are listed, and the preview shows the theme color for them. Undo history lasts for the session. **Export Theme File** writes the 22 colors to a theme file named after the theme; save it without an extension in `~/.config/ghostty/themes/` (or `$XDG_CONFIG_HOME/ghostty/themes/`) and set `theme = <name>`, or reference it by absolute path. The catalog itself never changes; new shared palettes belong in iTerm2 Color Schemes.
 
+## Sorting and Similar Themes
+
+The palette button on each theme card opens its colors: background, foreground, cursor, selection, and ANSI 0–15, each labeled and copyable with a click, Enter, or Space. **Find Similar Themes** in that view sets the **Sort** order in the filter bar to similarity with that theme.
+
+Search and filters decide which themes appear; the sort order only arranges them. Similarity ranks the themes that match the current search and filters, leaves out the theme it compares against, and stays available in **Sort** until another theme replaces it. Clearing the search or filters keeps the sort order. When nothing matches, **Clear Search and Filters** restores the list in the same order.
+
+Atlas computes these orders from the bundled palettes in the browser, with no tags to maintain. Colors are compared in OKLab, a perceptual color space where equal distances look about equally different. Brightness is the background's OKLab lightness and saturation its OKLCH chroma. Similarity is a weighted mean of color distances: background 40%, because it fills most of the terminal; foreground 20%, because it colors most text; and the 16 ANSI colors 40% together, because they shape prompts and syntax but each covers little of the screen. Equal values are ordered by theme name, so every order is deterministic.
+
 ## Repository Layout
 
 | Path                       | Contents                                                                   |
 | -------------------------- | -------------------------------------------------------------------------- |
 | `src/components/`          | Header, cards, theme picker, controls, and terminal preview.               |
-| `src/features/gallery/`    | Catalog filters and the scrolling theme strip.                             |
+| `src/features/gallery/`    | Catalog filters, sorting, similarity, the strip, and the palette view.     |
 | `src/features/comparison/` | Comparison state and paired previews.                                      |
 | `src/features/config/`     | Lossless config parsing, validation, settings, drafts, presets, transfer.  |
 | `src/features/palette/`    | Color overrides, the palette editor, and theme file import and export.     |
 | `src/features/share/`      | Shared link parsing and building, the share dialog, and link notices.      |
-| `src/shared/`              | Browser preferences, preview samples, and theme numbering and search.      |
+| `src/shared/`              | Preferences, preview samples, theme search, and OKLab color math.          |
 | `src/data/themes.js`       | Generated theme catalog.                                                   |
 | `src/styles/`              | UI tokens and component styles.                                            |
 | `scripts/`                 | Theme refresh and hook installation.                                       |

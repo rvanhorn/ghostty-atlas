@@ -17,6 +17,7 @@ export const ThemeStrip = ({
   savedThemes,
   onSelect,
   onToggleSaved,
+  onShowPalette,
   onClearFilters,
   resetKey,
 }) => {
@@ -251,6 +252,7 @@ export const ThemeStrip = ({
                   saved={savedThemes.includes(theme.name)}
                   onSelect={onSelect}
                   onToggleSaved={onToggleSaved}
+                  onShowPalette={onShowPalette}
                 />
               </div>
             );

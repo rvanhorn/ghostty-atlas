@@ -14,6 +14,8 @@ import { SettingsWorkspace } from "./features/config/settings-workspace.jsx";
 import { TransferDialog } from "./features/config/transfer-dialog.jsx";
 import { ComparisonView } from "./features/comparison/comparison-view.jsx";
 import { defaultFilters, filterThemes } from "./features/gallery/catalog.js";
+import { defaultSort, sortThemes } from "./features/gallery/discovery.js";
+import { PaletteDialog } from "./features/gallery/palette-dialog.jsx";
 import { updateComparison } from "./features/comparison/comparison-state.js";
 import { DraftRecoveryDialog } from "./features/config/draft-recovery-dialog.jsx";
 import { restoreConfigState } from "./features/config/config-state.js";
@@ -72,6 +74,9 @@ export const App = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [filters, setFilters] = useState(defaultFilters);
+  const [sort, setSort] = useState(defaultSort);
+  const [paletteTheme, setPaletteTheme] = useState(null);
+  const [paletteOpen, setPaletteOpen] = useState(false);
   const [transferOpen, setTransferOpen] = useState(false);
   const [transferSession, setTransferSession] = useState(0);
   const searchRef = useRef(null);
@@ -88,10 +93,21 @@ export const App = () => {
   const activeThemeName = (
     findTheme(previewThemeName) || findTheme(fallbackThemeName)
   ).name;
+  // Search and filters choose the themes; the sort order, including similarity, only arranges them.
   const filteredThemes = useMemo(
-    () => filterThemes(themes, searchQuery, filters, savedThemes),
-    [searchQuery, filters, savedThemes],
+    () =>
+      sortThemes(filterThemes(themes, searchQuery, filters, savedThemes), sort),
+    [searchQuery, filters, savedThemes, sort],
   );
+  const showPalette = useCallback((theme) => {
+    setPaletteTheme(theme);
+    setPaletteOpen(true);
+  }, []);
+  const findSimilar = (theme) => {
+    setSort({ order: "similar", similarTo: theme.name });
+    setPaletteOpen(false);
+    setFiltersOpen(true);
+  };
   const toggleSaved = useCallback(
     (themeName) =>
       setSavedThemes((current) =>
@@ -196,6 +212,8 @@ export const App = () => {
           onFilterChange={(key, value) =>
             setFilters((current) => ({ ...current, [key]: value }))
           }
+          sort={sort}
+          onSortChange={setSort}
           onReset={() => setFilters(defaultFilters)}
           resultCount={filteredThemes.length}
         />
@@ -206,8 +224,9 @@ export const App = () => {
           savedThemes={savedThemes}
           onSelect={customizeTheme}
           onToggleSaved={toggleSaved}
+          onShowPalette={showPalette}
           onClearFilters={clearFilters}
-          resetKey={JSON.stringify([searchQuery, filters])}
+          resetKey={JSON.stringify([searchQuery, filters, sort])}
         />
         <SettingsWorkspace
           config={config}
@@ -243,6 +262,13 @@ export const App = () => {
         onImported={() => {
           if (compareEnabled) setComparisonVisible(false);
         }}
+      />
+      <PaletteDialog
+        theme={paletteTheme}
+        open={paletteOpen}
+        onOpenChange={setPaletteOpen}
+        onFindSimilar={findSimilar}
+        getSimilarFocus={() => document.getElementById("theme-sort")}
       />
       <ShareDialog
         open={shareOpen}

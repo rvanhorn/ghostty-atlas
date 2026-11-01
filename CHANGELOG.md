@@ -15,6 +15,8 @@ All notable changes to Ghostty Atlas are documented here, grouped by release.
 - Switching to **Single Theme** keeps the previewed member, and switching back to **Light & Dark** restores an imported pair exactly or starts a new pair with the current theme on both sides. In pair mode, **Share** links the previewed member.
 - A **Palette** settings category edits the background, foreground, cursor, cursor text, selection, selection text, and ANSI 0–15 colors, starting from the previewed theme. Valid hex colors update the preview and its swatches as you type; other text explains what to fix. Changes are saved as Ghostty color settings in the config, so the catalog is unchanged. **Undo**, a reset button on each color, and **Reset All Colors** return to earlier colors or the theme's own.
 - **Export Theme File** downloads a Ghostty theme file with the edited colors and explains where to save it and how to reference it with `theme = <name>` or an absolute path. **Import Theme File** applies the colors of a theme file, including one exported from Atlas.
+- A palette button on each theme card opens the theme's window colors and labeled ANSI colors 0–15; selecting a color, by pointer or keyboard, copies its hex value.
+- **Find Similar Themes** ranks the other themes by how close their background, foreground, and ANSI colors are in the OKLab color space, with ties ordered by name. A **Sort** control in the filter bar also orders themes by background brightness or saturation in either direction. Sorting applies after search and filters narrow the list.
 
 ### Changed
 

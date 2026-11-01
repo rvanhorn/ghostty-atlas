@@ -1,5 +1,9 @@
 import { test, expect } from "@playwright/test";
 import { themes } from "../../src/data/themes.js";
+import {
+  rankSimilarThemes,
+  sortThemes,
+} from "../../src/features/gallery/discovery.js";
 
 test("the larger catalog still mounts a bounded range and reaches its last theme", async ({
   page,
@@ -94,4 +98,89 @@ test("saved-only removal keeps focus usable and comparison customization selects
       }),
     )
     .toBe(true);
+});
+
+/* Issue #5, "Find similar themes and inspect complete palettes": the palette view
+   labels and copies colors 0–15 from the keyboard, Find Similar ranks other
+   themes without the selected one, and sorting works in either direction. */
+test("the palette view copies labeled colors and Find Similar reorders the strip", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    navigator.clipboard.writeText = (text) => {
+      window.copiedText = text;
+      return Promise.resolve();
+    };
+  });
+  await page.goto("/tests/browser/app.fixture.html");
+  const strip = page.getByRole("region", {
+    name: "Theme Catalog",
+    exact: true,
+  });
+  const reference = themes[0];
+  await strip
+    .getByRole("button", { name: `Select ${reference.name}`, exact: true })
+    .focus();
+  await page.keyboard.press("Tab");
+  await expect(
+    strip.getByRole("button", {
+      name: `Show ${reference.name} Palette`,
+      exact: true,
+    }),
+  ).toBeFocused();
+  await page.keyboard.press("Enter");
+  const dialog = page.getByRole("dialog", {
+    name: `${reference.name} Palette`,
+  });
+  const ansi = dialog.getByRole("group", { name: "ANSI Colors 0–15" });
+  await expect(ansi.getByRole("button")).toHaveCount(16);
+  await expect(
+    ansi.getByRole("button", {
+      name: `Copy 0 Black ${reference.palette[0]}`,
+      exact: true,
+    }),
+  ).toBeVisible();
+  const brightWhite = ansi.getByRole("button", {
+    name: `Copy 15 Bright White ${reference.palette[15]}`,
+    exact: true,
+  });
+  await brightWhite.focus();
+  await page.keyboard.press("Enter");
+  await expect(dialog.getByRole("status")).toHaveText(
+    `Copied 15 Bright White ${reference.palette[15]}.`,
+  );
+  expect(await page.evaluate(() => window.copiedText)).toBe(
+    reference.palette[15],
+  );
+
+  await dialog.getByRole("button", { name: "Find Similar Themes" }).click();
+  await expect(dialog).toHaveCount(0);
+  const sort = page.getByRole("combobox", { name: "Sort Themes" });
+  await expect(sort).toBeFocused();
+  await expect(sort).toHaveText(`Similar to ${reference.name}`);
+  await expect(
+    page.getByRole("status").filter({ hasText: "Themes" }),
+  ).toHaveText(`${themes.length - 1} Themes`);
+  const ranked = rankSimilarThemes(themes, reference);
+  const firstCard = strip.locator(".theme-card-pick").first();
+  await expect(firstCard).toHaveAccessibleName(`Select ${ranked[0].name}`);
+  await expect(
+    strip.getByRole("button", {
+      name: `Select ${reference.name}`,
+      exact: true,
+    }),
+  ).toHaveCount(0);
+
+  await sort.click();
+  await page
+    .getByRole("option", { name: "Background: Light to Dark", exact: true })
+    .click();
+  const lightest = sortThemes(themes, { order: "brightness-desc" });
+  await expect(firstCard).toHaveAccessibleName(`Select ${lightest[0].name}`);
+  await sort.click();
+  await page
+    .getByRole("option", { name: "Saturation: High to Low", exact: true })
+    .click();
+  const vivid = sortThemes(themes, { order: "saturation-desc" });
+  await expect(firstCard).toHaveAccessibleName(`Select ${vivid[0].name}`);
 });
