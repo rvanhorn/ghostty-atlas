@@ -13,6 +13,12 @@ All notable changes to Ghostty Atlas are documented here, grouped by release.
 - Opening a shared link applies its theme, or opens the comparison with its sample, and names any unknown theme, sample, or malformed part it ignored. A stored draft is still offered; restoring it keeps the draft's theme and offers to apply the shared one, and saved presets are untouched.
 - **Light & Dark** theme mode configures Ghostty's paired `theme = light:Name,dark:Name` setting. A Light and Dark toggle previews either member, and theme cards set the previewed member. Imported pairs are recognized in either order with surrounding whitespace and stay byte-for-byte unchanged until edited; missing, unlabeled, or uncataloged members are explained while the expression stays as written.
 - Switching to **Single Theme** keeps the previewed member, and switching back to **Light & Dark** restores an imported pair exactly or starts a new pair with the current theme on both sides. In pair mode, **Share** links the previewed member.
+- A **Palette** settings category edits the background, foreground, cursor, cursor text, selection, selection text, and ANSI 0–15 colors, starting from the previewed theme. Valid hex colors update the preview and its swatches as you type; other text explains what to fix. Changes are saved as Ghostty color settings in the config, so the catalog is unchanged. **Undo**, a reset button on each color, and **Reset All Colors** return to earlier colors or the theme's own.
+- **Export Theme File** downloads a Ghostty theme file with the edited colors and explains where to save it and how to reference it with `theme = <name>` or an absolute path. **Import Theme File** applies the colors of a theme file, including one exported from Atlas.
+
+### Changed
+
+- The configuration preview applies the config's own `background`, `foreground`, `cursor-color`, `cursor-text`, `selection-background`, `selection-foreground`, and `palette` settings over the theme, as Ghostty does. Imported configs with these settings now preview the colors Ghostty shows; color names Atlas cannot read are listed and keep the theme color.
 
 ### Fixed
 

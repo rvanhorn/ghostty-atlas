@@ -42,6 +42,10 @@ export const useConfig = (initialThemeName = null) => {
     setThemeMode: (paired, appearance) =>
       dispatch({ type: "theme-mode", paired, appearance }),
     resetSection: (keys) => dispatch({ type: "reset", keys }),
+    // Null removes a color's override; `coalesce` merges repeated edits into one undo step.
+    updatePalette: (colors, coalesce) =>
+      dispatch({ type: "palette", colors, coalesce }),
+    undoPalette: () => dispatch({ type: "palette-undo" }),
     revert: () => dispatch({ type: "revert" }),
     restore: (storedSnapshot, filename) =>
       dispatch({ type: "restore", snapshot: storedSnapshot, filename }),

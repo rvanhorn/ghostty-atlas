@@ -1,9 +1,13 @@
+import { colorConfigKeys } from "../palette/palette.js";
+
 export const settingCategories = [
   {
     id: "typography",
     label: "Typography",
     keys: ["font-family", "font-size", "minimum-contrast"],
   },
+  // Rendered by the palette editor rather than as setting fields.
+  { id: "palette", label: "Palette", keys: colorConfigKeys },
   {
     id: "background",
     label: "Background",

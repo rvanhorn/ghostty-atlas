@@ -311,6 +311,114 @@
   padding: 4px;
 }
 
+.palette-editor {
+  display: grid;
+  gap: var(--space-3);
+}
+.palette-intro {
+  margin-top: 0;
+}
+.palette-editor code,
+.theme-file-steps code {
+  font-family: "Geist Mono", monospace;
+  overflow-wrap: anywhere;
+}
+.palette-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.palette-editor > .transfer-status,
+.palette-editor > .field-error {
+  margin: 0;
+}
+.palette-heading {
+  margin: var(--space-2) 0 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+.palette-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  align-items: start;
+  gap: var(--space-3) var(--space-4);
+}
+.palette-row {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+  align-items: end;
+  gap: var(--space-1) var(--space-2);
+  min-width: 0;
+}
+.palette-swatch {
+  width: 40px;
+  height: 36px;
+  padding: 2px;
+  cursor: pointer;
+}
+.palette-swatch::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+/* Separate rules: a list with an unknown pseudo-element is dropped entirely. */
+.palette-swatch::-webkit-color-swatch {
+  border: 0;
+  border-radius: 2px;
+}
+.palette-swatch::-moz-color-swatch {
+  border: 0;
+  border-radius: 2px;
+}
+.palette-copy {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+}
+.palette-copy label {
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.palette-hex {
+  width: 100%;
+  min-height: 36px;
+  padding: 4px 8px;
+  font-family: "Geist Mono", monospace;
+}
+.palette-error {
+  grid-column: 1 / -1;
+  margin-top: 0;
+}
+.theme-file-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.theme-file-content > .transfer-description,
+.theme-file-content > .field-error {
+  margin-top: 0;
+}
+.theme-file-source {
+  flex: none;
+  height: 200px;
+  margin-top: var(--space-2);
+}
+.theme-file-content h3 {
+  margin: var(--space-2) 0 0;
+}
+.theme-file-steps {
+  margin: 0;
+  padding-left: 20px;
+  display: grid;
+  gap: var(--space-1);
+  color: var(--muted);
+  line-height: 1.6;
+}
+.theme-file-content .transfer-actions {
+  margin-top: var(--space-2);
+}
+
 .field-preview-note {
   display: block;
   margin-top: 4px;

@@ -11,7 +11,8 @@ Browse Ghostty themes, compare terminal palettes, and build a configuration with
 - Compare two themes with independent previews and lock either side while browsing.
 - Share a link to the current theme, or to a two-theme comparison, with the selected preview sample.
 - Configure separate light and dark themes, which Ghostty switches with the system appearance, and preview either one.
-- Adjust typography, background, layout, cursor, behavior, and macOS settings.
+- Adjust typography, palette, background, layout, cursor, behavior, and macOS settings.
+- Edit a theme's window and ANSI colors, then export them as a Ghostty theme file or import a theme file's colors.
 - Import an existing config without losing untouched comments, unknown directives, or line endings.
 - Copy or download the result, or download an installation script that backs up the existing config before replacing it.
 - Recover an unfinished config after a reload, and save, load, rename, and delete named presets such as Laptop, Work, and Presentation.
@@ -97,6 +98,8 @@ Import files are limited to 256 KB. Unknown settings are preserved, and invalid 
 
 **Light & Dark** mode writes Ghostty's `theme = light:Name,dark:Name` form. Atlas does not detect the system appearance for the preview; the Light and Dark toggle chooses which member to preview, and theme cards set that member. An imported pair in either order, with any surrounding whitespace, stays unchanged until edited. Missing, unlabeled, or uncataloged members are explained and the expression is kept as written. Switching to **Single Theme** keeps the previewed member; switching back restores an imported pair or starts a pair with the current theme on both sides.
 
+**Palette** edits are written to the config as Ghostty color settings (`background`, `foreground`, `cursor-color`, `cursor-text`, `selection-background`, `selection-foreground`, and `palette = N=#rrggbb`), which Ghostty applies over any theme, including both members of a light and dark pair. The preview applies the same settings from an imported config. Atlas reads hex colors only; X11 color names stay in the config and are listed, and the preview shows the theme color for them. Undo history lasts for the session. **Export Theme File** writes the 22 colors to a theme file named after the theme; save it without an extension in `~/.config/ghostty/themes/` (or `$XDG_CONFIG_HOME/ghostty/themes/`) and set `theme = <name>`, or reference it by absolute path. The catalog itself never changes; new shared palettes belong in iTerm2 Color Schemes.
+
 ## Repository Layout
 
 | Path                       | Contents                                                                   |
@@ -105,6 +108,7 @@ Import files are limited to 256 KB. Unknown settings are preserved, and invalid 
 | `src/features/gallery/`    | Catalog filters and the scrolling theme strip.                             |
 | `src/features/comparison/` | Comparison state and paired previews.                                      |
 | `src/features/config/`     | Lossless config parsing, validation, settings, drafts, presets, transfer.  |
+| `src/features/palette/`    | Color overrides, the palette editor, and theme file import and export.     |
 | `src/features/share/`      | Shared link parsing and building, the share dialog, and link notices.      |
 | `src/shared/`              | Browser preferences, preview samples, and theme numbering and search.      |
 | `src/data/themes.js`       | Generated theme catalog.                                                   |

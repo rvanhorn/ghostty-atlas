@@ -184,11 +184,14 @@ test("settings categories expose every editable setting exactly once", async () 
   const categorizedKeys = settingCategories.flatMap(
     (category) => category.keys,
   );
-  assert.equal(settingCategories.length, 6);
+  const { colorConfigKeys } =
+    await import("../src/features/palette/palette.js");
+  assert.equal(settingCategories.length, 7);
   assert.equal(new Set(categorizedKeys).size, categorizedKeys.length);
+  // Issue #4: the Palette category holds the color settings its editor writes.
   assert.deepEqual(
     [...categorizedKeys].sort(),
-    fields.map((field) => field.key).sort(),
+    [...fields.map((field) => field.key), ...colorConfigKeys].sort(),
   );
 });
 

@@ -44,4 +44,14 @@ test("configuration imports preserve bytes through edits, undo, and resets", () 
     'font-family = First\nfont-family = ""\nfont-family = Last',
   );
   assert.deepEqual(reset.values("font-family"), ["Last"]);
+  // Issue #4: every palette line counts, and removing a key drops its lines.
+  const palette = new ConfigDocument(
+    "palette = 0=#000000\nbackground = #111111\npalette = 1=#222222\n",
+  );
+  assert.deepEqual(palette.values("palette"), ["0=#000000", "1=#222222"]);
+  palette.set("palette", ["0=#000000", "1=#222222"]);
+  assert.equal(palette.edits.size, 0, "Same palette entries are not an edit");
+  palette.remove("background");
+  palette.set("palette", ["1=#333333"]);
+  assert.equal(palette.export(), "palette = 1=#333333\n");
 });

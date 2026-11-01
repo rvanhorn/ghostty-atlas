@@ -9,6 +9,8 @@ import { TerminalPreview } from "../../components/terminal-preview.jsx";
 import { previewSamples } from "../../shared/preview-samples.js";
 import { SettingField } from "./setting-field.jsx";
 import { ThemeModeControls } from "./theme-mode-controls.jsx";
+import { PaletteEditor } from "../palette/palette-editor.jsx";
+import { applyColorOverrides, readColorOverrides } from "../palette/palette.js";
 import {
   describeThemePair,
   fallbackThemeName,
@@ -37,6 +39,9 @@ export const SettingsWorkspace = ({
   const pairNotes = describeThemePair(themeValue);
   const previewThemeName = getThemeName(themeValue, previewAppearance);
   const theme = findTheme(previewThemeName) || findTheme(fallbackThemeName);
+  // Config color settings override the theme in Ghostty, so the preview applies them too.
+  const colorOverrides = readColorOverrides(config.document);
+  const previewTheme = applyColorOverrides(theme, colorOverrides.colors);
 
   return (
     <section
@@ -73,34 +78,46 @@ export const SettingsWorkspace = ({
           </div>
         </div>
         <div className="settings-fields-scroll">
-          <div className="settings-fields">
-            {visibleFields.map((field) => (
-              <SettingField
-                key={field.key}
-                field={field}
-                previewRequirement={
-                  ["window-theme", "macos-titlebar-proxy-icon"].includes(
-                    field.key,
-                  ) && titlebar !== "native"
-                    ? "Choose Native in Titlebar & Tabs to enable this option."
-                    : [
-                          "macos-window-buttons",
-                          "window-title-font-family",
-                        ].includes(field.key) && titlebar === "hidden"
-                      ? "Show the titlebar in Titlebar & Tabs to enable this option."
-                      : field.key === "background-blur" &&
-                          Number(
-                            config.document.get("background-opacity") || 1,
-                          ) === 1
-                        ? "Lower Background Opacity below 1 to enable blur."
-                        : undefined
-                }
-                value={config.getValue(field.key)}
-                error={config.errors[field.key]}
-                onChange={config.updateField}
-              />
-            ))}
-          </div>
+          {category === "palette" ? (
+            <PaletteEditor
+              config={config}
+              sourceTheme={theme}
+              previewTheme={previewTheme}
+              overrides={colorOverrides}
+              paired={parseThemeValue(themeValue).paired}
+              themeValue={themeValue}
+              previewAppearance={previewAppearance}
+            />
+          ) : (
+            <div className="settings-fields">
+              {visibleFields.map((field) => (
+                <SettingField
+                  key={field.key}
+                  field={field}
+                  previewRequirement={
+                    ["window-theme", "macos-titlebar-proxy-icon"].includes(
+                      field.key,
+                    ) && titlebar !== "native"
+                      ? "Choose Native in Titlebar & Tabs to enable this option."
+                      : [
+                            "macos-window-buttons",
+                            "window-title-font-family",
+                          ].includes(field.key) && titlebar === "hidden"
+                        ? "Show the titlebar in Titlebar & Tabs to enable this option."
+                        : field.key === "background-blur" &&
+                            Number(
+                              config.document.get("background-opacity") || 1,
+                            ) === 1
+                          ? "Lower Background Opacity below 1 to enable blur."
+                          : undefined
+                  }
+                  value={config.getValue(field.key)}
+                  error={config.errors[field.key]}
+                  onChange={config.updateField}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </section>
       <div className="settings-preview-stage">
@@ -119,7 +136,7 @@ export const SettingsWorkspace = ({
             }
           />
           <TerminalPreview
-            theme={theme}
+            theme={previewTheme}
             sample={sample}
             document={config.document}
           />

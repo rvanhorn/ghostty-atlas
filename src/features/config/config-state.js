@@ -2,6 +2,11 @@ import { ConfigDocument } from "./config-document.js";
 import { fields } from "./fields.js";
 import { selectTheme, switchThemeMode } from "./theme-value.js";
 import { validateSetting } from "./validation.js";
+import {
+  captureColorEdits,
+  restoreColorEdits,
+  writeColor,
+} from "../palette/palette.js";
 
 export const starterConfig =
   "# Built with Ghostty Atlas\ntheme = Catppuccin Mocha\nfont-family = Geist Mono\nfont-size = 14\nwindow-padding-x = 20\nwindow-padding-y = 20\nbackground-opacity = 1\n";
@@ -15,6 +20,8 @@ export const createConfigState = (
   inputs: {},
   errors: {},
   filename,
+  // Color edits before each palette change, newest last, for undo.
+  paletteHistory: [],
 });
 
 /* A snapshot is the plain-data form of the config state that browser storage keeps. */
@@ -47,6 +54,15 @@ const cloneDocument = (document) => {
   return nextDocument;
 };
 
+// Adds an undo step when a change touched the color settings.
+const recordPaletteHistory = (state, nextDocument) => {
+  const before = captureColorEdits(state.document);
+  return JSON.stringify(before) ===
+    JSON.stringify(captureColorEdits(nextDocument))
+    ? state.paletteHistory
+    : [...state.paletteHistory, before];
+};
+
 export const configReducer = (state, action) => {
   if (action.type === "import")
     return createConfigState(action.source, action.filename);
@@ -69,6 +85,39 @@ export const configReducer = (state, action) => {
       lastChangedKey: null,
       inputs: nextInputs,
       errors: nextErrors,
+      paletteHistory: recordPaletteHistory(state, nextDocument),
+    };
+  }
+  /* `colors` maps color target ids to hex colors, or null to remove the override.
+     Repeated changes to one target with `coalesce` form one undo step, such as a
+     drag across the color picker. */
+  if (action.type === "palette") {
+    const nextDocument = cloneDocument(state.document);
+    Object.entries(action.colors).forEach(([id, color]) =>
+      writeColor(nextDocument, id, color),
+    );
+    const history = recordPaletteHistory(state, nextDocument);
+    if (history === state.paletteHistory) return state;
+    const changedKey = action.coalesce ? `palette:${action.coalesce}` : null;
+    return {
+      ...state,
+      document: nextDocument,
+      lastChangedKey: changedKey,
+      paletteHistory:
+        changedKey && state.lastChangedKey === changedKey
+          ? state.paletteHistory
+          : history,
+    };
+  }
+  if (action.type === "palette-undo") {
+    if (!state.paletteHistory.length) return state;
+    const nextDocument = cloneDocument(state.document);
+    restoreColorEdits(nextDocument, state.paletteHistory.at(-1));
+    return {
+      ...state,
+      document: nextDocument,
+      lastChangedKey: null,
+      paletteHistory: state.paletteHistory.slice(0, -1),
     };
   }
   if (action.type === "theme") {
