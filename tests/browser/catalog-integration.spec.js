@@ -72,6 +72,22 @@ test("saved-only removal keeps focus usable and comparison customization selects
   await expect(
     page.getByRole("button", { name: "Next Left Theme", exact: true }),
   ).toBeDisabled();
+  // Issue #8: browsing steps the unlocked side while the locked side stays.
+  const leftValue = await leftTheme.inputValue();
+  const rightTheme = page.getByRole("combobox", {
+    name: "Right Theme",
+    exact: true,
+  });
+  const rightValue = await rightTheme.inputValue();
+  await page
+    .getByRole("button", { name: "Next Right Theme", exact: true })
+    .click();
+  await expect(rightTheme).not.toHaveValue(rightValue);
+  await expect(leftTheme).toHaveValue(leftValue);
+  await page
+    .getByRole("button", { name: "Previous Right Theme", exact: true })
+    .click();
+  await expect(rightTheme).toHaveValue(rightValue);
   await page
     .getByRole("region", { name: "Left Comparison" })
     .getByRole("button", {
@@ -183,4 +199,131 @@ test("the palette view copies labeled colors and Find Similar reorders the strip
     .click();
   const vivid = sortThemes(themes, { order: "saturation-desc" });
   await expect(firstCard).toHaveAccessibleName(`Select ${vivid[0].name}`);
+});
+
+/* Issue #8, "Verify search, filters, and bookmark persistence through the actual
+   interface": search and the Appearance filter narrow the bundled catalog together,
+   and a bookmark survives a reload and is all that Saved Only shows. */
+test("search and filters narrow the catalog and bookmarks survive a reload", async ({
+  page,
+}) => {
+  await page.goto("/tests/browser/app.fixture.html");
+  const strip = page.getByRole("region", {
+    name: "Theme Catalog",
+    exact: true,
+  });
+  const resultCount = page
+    .getByRole("status")
+    .filter({ hasText: /^\d+ Themes$/ });
+  await page.getByRole("button", { name: "Filter", exact: true }).click();
+  await expect(resultCount).toHaveText(`${themes.length} Themes`);
+
+  await page.getByRole("searchbox", { name: "Search Themes" }).fill("gruvbox");
+  const named = themes.filter(({ name }) =>
+    name.toLowerCase().includes("gruvbox"),
+  );
+  await expect(resultCount).toHaveText(`${named.length} Themes`);
+  await page.getByRole("combobox", { name: "Appearance", exact: true }).click();
+  await page.getByRole("option", { name: "Light", exact: true }).click();
+  await page.keyboard.press("Escape");
+  const light = named.filter(({ appearance }) => appearance === "light");
+  expect(light.length).toBeGreaterThan(0);
+  expect(light.length).toBeLessThan(named.length);
+  await expect(resultCount).toHaveText(`${light.length} Themes`);
+  await expect(strip.locator(".theme-card-pick")).toHaveText(
+    light.map(({ name }) => new RegExp(name)),
+  );
+
+  const bookmarked = light[0].name;
+  await strip
+    .getByRole("button", { name: `Save ${bookmarked}`, exact: true })
+    .click();
+  await page.reload();
+  await page.getByRole("button", { name: "Filter", exact: true }).click();
+  await expect(resultCount).toHaveText(`${themes.length} Themes`);
+  await page.getByRole("switch", { name: "Saved Only" }).click();
+  await expect(resultCount).toHaveText("1 Themes");
+  await expect(
+    strip.getByRole("button", { name: `Unsave ${bookmarked}`, exact: true }),
+  ).toHaveAttribute("aria-pressed", "true");
+});
+
+/* Issue #8, "Check keyboard access and focus behavior for primary controls and the
+   import/export dialog": the search shortcut and Tab reach the header controls, and
+   the dialog takes focus, keeps it inside, imports from the keyboard, and returns
+   focus to its button when it closes. */
+test("header controls and the import/export dialog work from the keyboard", async ({
+  page,
+}) => {
+  await page.goto("/tests/browser/app.fixture.html");
+  const search = page.getByRole("searchbox", { name: "Search Themes" });
+  await page.keyboard.press("ControlOrMeta+K");
+  await expect(search).toBeFocused();
+  await page.keyboard.type("nord");
+  await expect(search).toHaveValue("nord");
+  await page.keyboard.press("Escape");
+  await expect(search).toHaveValue("");
+
+  const filter = page.getByRole("button", { name: "Filter", exact: true });
+  await page.keyboard.press("Tab");
+  await expect(filter).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(filter).toHaveAttribute("aria-expanded", "true");
+  const compare = page.getByRole("button", { name: "Compare", exact: true });
+  await page.keyboard.press("Tab");
+  await expect(compare).toBeFocused();
+  await page.keyboard.press("Space");
+  await expect(compare).toHaveAttribute("aria-pressed", "true");
+  await page.keyboard.press("Space");
+  await expect(compare).toHaveAttribute("aria-pressed", "false");
+
+  const transfer = page.getByRole("button", { name: "Import / Export" });
+  await page.keyboard.press("Tab");
+  await page.keyboard.press("Tab");
+  await expect(transfer).toBeFocused();
+  await page.keyboard.press("Enter");
+  const dialog = page.getByRole("dialog", { name: "Your Ghostty Config" });
+  await expect(dialog).toBeVisible();
+  const focusInDialog = () =>
+    dialog.evaluate((element) => element.contains(document.activeElement));
+  await expect.poll(focusInDialog).toBe(true);
+  for (let step = 0; step < 12; step += 1) {
+    await page.keyboard.press("Tab");
+    // Focus guards at the dialog's edges hand focus back inside.
+    await expect.poll(focusInDialog).toBe(true);
+  }
+
+  // Tab reaches the selected tab, arrow keys move between tabs, and Tab then
+  // moves on to the import field and button.
+  const tabTo = async (target) => {
+    for (let step = 0; step < 10; step += 1) {
+      if (
+        await target.evaluate((element) => element === document.activeElement)
+      )
+        break;
+      await page.keyboard.press("Tab");
+    }
+    await expect(target).toBeFocused();
+  };
+  await tabTo(dialog.getByRole("tab", { name: "Export", exact: true }));
+  await page.keyboard.press("ArrowLeft");
+  const importTab = dialog.getByRole("tab", { name: "Import", exact: true });
+  await expect(importTab).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(importTab).toHaveAttribute("aria-selected", "true");
+  await tabTo(dialog.getByLabel("Config to Import"));
+  await page.keyboard.type("font-size = 19");
+  await tabTo(dialog.getByRole("button", { name: "Import Config" }));
+  await page.keyboard.press("Enter");
+  await expect(dialog).toHaveCount(0);
+  await expect(transfer).toBeFocused();
+  await expect(
+    page.getByRole("spinbutton", { name: "Font Size", exact: true }),
+  ).toHaveValue("19");
+
+  await page.keyboard.press("Enter");
+  await expect(dialog).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(dialog).toHaveCount(0);
+  await expect(transfer).toBeFocused();
 });

@@ -43,7 +43,7 @@ jobs:
           path: dist
 
   browser:
-    name: Catalog browser regressions
+    name: Browser regressions
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -59,13 +59,13 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Install browser dependencies
         run: pnpm exec playwright install --with-deps chromium firefox
-      - name: Check catalog interactions in Chromium and Firefox
+      - name: Check core workflows in Chromium and Firefox
         run: pnpm test:browser
-      - name: Upload catalog screenshots and browser failure artifacts
+      - name: Upload screenshots and browser failure traces
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
-          name: catalog-browser-artifacts
+          name: browser-test-artifacts
           path: test-results/
           retention-days: 7
 

@@ -44,7 +44,7 @@ Open <http://127.0.0.1:5173>. For another port, run `pnpm dev --port 5191`. Inst
 | `pnpm build`             | Refresh themes and build the static site into `dist/`.                    |
 | `pnpm preview`           | Serve the production build locally; stop dev first or use another port.   |
 | `pnpm test`              | Run the Vitest suite once.                                                |
-| `pnpm test:browser`      | Check catalog interactions in Chromium and Firefox with Playwright.       |
+| `pnpm test:browser`      | Check core workflows in Chromium and Firefox with Playwright.             |
 | `pnpm benchmark:catalog` | Measure catalog rendering, search, DOM size, and scrolling.               |
 | `pnpm test:watch`        | Run Vitest in watch mode while editing.                                   |
 | `pnpm lint`              | Run Oxlint.                                                               |
@@ -74,7 +74,7 @@ Set `GITHUB_TOKEN` to authenticate the upstream GitHub API listing and avoid the
 
 [`.github/workflows/pages.yml`](.github/workflows/pages.yml) checks pull requests and deploys pushes to `main`. A manual run is also available in the Actions tab.
 
-The build job installs the locked dependencies, refreshes themes, and runs `pnpm check`. A separate browser job checks catalog interactions in Chromium and Firefox using the bundled catalog. Deployment requires both jobs to pass. Deployment permissions are limited to the deployment job. The workflow uses GitHub's Pages artifact and deployment actions; it does not commit build output or refreshed files back to the repository. See [CONTRIBUTING.md](CONTRIBUTING.md) for browser setup and catalog performance measurements.
+The build job installs the locked dependencies, refreshes themes, and runs `pnpm check`. A separate browser job checks core workflows in Chromium and Firefox using the bundled catalog and uploads screenshots and failure traces. Deployment requires both jobs to pass. Deployment permissions are limited to the deployment job. The workflow uses GitHub's Pages artifact and deployment actions; it does not commit build output or refreshed files back to the repository. See [CONTRIBUTING.md](CONTRIBUTING.md) for browser setup and catalog performance measurements.
 
 In repository **Settings → Pages**, select **GitHub Actions** as the publishing source. The project URL is <https://rvanhorn.github.io/ghostty-atlas/>.
 
