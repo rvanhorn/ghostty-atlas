@@ -3,6 +3,7 @@ import { Copy, Download, Upload } from "lucide-react";
 import { Modal } from "../../components/ui/modal.jsx";
 import { Button } from "../../components/ui/button.jsx";
 import { SegmentedControl } from "../../components/ui/segmented-control.jsx";
+import { PresetsPanel } from "./presets-panel.jsx";
 import {
   createConfigScript,
   SCRIPT_COMMAND,
@@ -14,6 +15,7 @@ export const TransferDialog = ({
   onOpenChange,
   onOpenChangeComplete,
   config,
+  configStorage,
   onImported,
 }) => {
   const [mode, setMode] = useState("export");
@@ -94,6 +96,7 @@ export const TransferDialog = ({
           options={[
             ["import", "Import"],
             ["export", "Export"],
+            ["presets", "Presets"],
           ]}
           onValueChange={(value) => {
             setMode(value);
@@ -115,7 +118,16 @@ export const TransferDialog = ({
           />
         )}
       </div>
-      {mode === "import" ? (
+      {mode === "presets" ? (
+        <PresetsPanel
+          configStorage={configStorage}
+          filename={config.filename}
+          onLoaded={() => {
+            onImported();
+            onOpenChange(false);
+          }}
+        />
+      ) : mode === "import" ? (
         <div className="transfer-content">
           <div className="transfer-intro">
             <span>Paste your config or choose a file.</span>

@@ -12,6 +12,7 @@ Browse Ghostty themes, compare terminal palettes, and build a configuration with
 - Adjust typography, background, layout, cursor, behavior, and macOS settings.
 - Import an existing config without losing untouched comments, unknown directives, or line endings.
 - Copy or download the result, or download an installation script that backs up the existing config before replacing it.
+- Recover an unfinished config after a reload, and save, load, rename, and delete named presets such as Laptop, Work, and Presentation.
 
 The app uses React, Base UI, Vite, and bundled Geist fonts. Theme previews retain each terminal palette; the app interface has its own dark palette.
 
@@ -84,7 +85,7 @@ Open <http://127.0.0.1:4173/ghostty-atlas/>. Other static hosts can publish `dis
 
 ## Storage and Preview Limits
 
-Bookmarks and comparison theme names are stored in each visitor's browser local storage. Config contents and drafts remain in tab memory and are lost on reload. Atlas has no backend, database, or account system; it does not write directly to a visitor's Ghostty installation.
+Bookmarks and comparison theme names are stored in each visitor's browser local storage under `ghostty-atlas`. The latest unfinished config is stored as a draft under `ghostty-atlas-draft`, and named presets under `ghostty-atlas-presets`, both in this browser's local storage only. On return, Atlas offers to restore or discard the draft, including its imported source, pending values, and values that still need fixing. Each record carries a version; Atlas leaves records from another version untouched, and works without saving when storage is unavailable or full. **Clear Saved Configs** in the Presets tab of Import / Export removes the draft and every preset but keeps bookmarks. Atlas has no backend, database, or account system; it does not write directly to a visitor's Ghostty installation.
 
 The preview is a static sample rather than an interactive terminal. Fonts depend on browser availability. Font size and padding use logical pixels; contrast, blur, transparency, padding balance, and window chrome approximate native rendering. Reduced motion disables cursor blinking. Controls marked **Config Only** affect the exported config without changing the sample. Controls marked **Approximate** describe browser simulations.
 
@@ -97,7 +98,7 @@ Import files are limited to 256 KB. Unknown settings are preserved, and invalid 
 | `src/components/`          | Header, cards, theme picker, controls, and terminal preview.               |
 | `src/features/gallery/`    | Catalog filters and the scrolling theme strip.                             |
 | `src/features/comparison/` | Comparison state and paired previews.                                      |
-| `src/features/config/`     | Lossless config parsing, validation, settings, and transfer dialog.        |
+| `src/features/config/`     | Lossless config parsing, validation, settings, drafts, presets, transfer.  |
 | `src/shared/`              | Browser preferences and theme numbering and search.                        |
 | `src/data/themes.js`       | Generated theme catalog.                                                   |
 | `src/styles/`              | UI tokens and component styles.                                            |

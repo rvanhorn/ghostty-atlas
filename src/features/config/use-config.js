@@ -1,15 +1,21 @@
-import { useCallback, useMemo, useReducer } from "react";
-import { configReducer, createConfigState } from "./config-state.js";
+import { useCallback, useMemo, useReducer, useState } from "react";
+import {
+  configReducer,
+  createConfigSnapshot,
+  createConfigState,
+} from "./config-state.js";
 import { parseImport } from "./validation.js";
 
 export const useConfig = () => {
   const [state, dispatch] = useReducer(configReducer, undefined, () =>
     createConfigState(),
   );
+  const [initialState] = useState(state);
   const exportedConfig = useMemo(
     () => state.document.export(),
     [state.document],
   );
+  const snapshot = useMemo(() => createConfigSnapshot(state), [state]);
   const setTheme = useCallback(
     (themeName) => dispatch({ type: "theme", themeName }),
     [],
@@ -17,6 +23,9 @@ export const useConfig = () => {
   return {
     ...state,
     exportedConfig,
+    snapshot,
+    // False until the first change, so opening Atlas never replaces a stored draft.
+    changed: state !== initialState,
     dirty: exportedConfig !== state.document.source,
     hasErrors: Object.keys(state.errors).length > 0,
     getValue: (key) => state.inputs[key] ?? state.document.get(key),
@@ -24,6 +33,8 @@ export const useConfig = () => {
     setTheme,
     resetSection: (keys) => dispatch({ type: "reset", keys }),
     revert: () => dispatch({ type: "revert" }),
+    restore: (storedSnapshot, filename) =>
+      dispatch({ type: "restore", snapshot: storedSnapshot, filename }),
     importConfig: (source, filename) => {
       parseImport(source);
       dispatch({ type: "import", source, filename });

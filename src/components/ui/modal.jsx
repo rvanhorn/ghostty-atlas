@@ -7,6 +7,8 @@ export const Modal = ({
   onOpenChangeComplete,
   title,
   description,
+  closeLabel = "Close Import and Export",
+  className = "",
   children,
 }) => (
   <Dialog.Root
@@ -16,7 +18,7 @@ export const Modal = ({
   >
     <Dialog.Portal>
       <Dialog.Backdrop className="modal-backdrop" />
-      <Dialog.Popup className="modal-popup">
+      <Dialog.Popup className={`modal-popup ${className}`}>
         <div className="modal-heading">
           <div className="modal-heading-copy">
             <Dialog.Title className="modal-title">{title}</Dialog.Title>
@@ -26,7 +28,7 @@ export const Modal = ({
           </div>
           <Dialog.Close
             className="button button--quiet icon-button"
-            aria-label="Close Import and Export"
+            aria-label={closeLabel}
           >
             <X size={18} />
           </Dialog.Close>

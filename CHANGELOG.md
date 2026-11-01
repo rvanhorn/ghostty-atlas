@@ -4,6 +4,12 @@ All notable changes to Ghostty Atlas are documented here, grouped by release.
 
 ## Unreleased
 
+### Added
+
+- Draft recovery: Atlas keeps the latest unfinished config in this browser's local storage and offers to restore or discard it on return. A restored draft keeps its imported source, comments, unknown directives, line endings, and pending values, and invalid values still block export.
+- Named config presets in a new Presets tab of Import / Export. Presets can be saved, loaded, renamed, and deleted; loading a preset over unsaved work offers to save that work as a preset or discard it.
+- **Clear Saved Configs** removes the stored draft and presets while keeping bookmarks. Versioned storage records from another Atlas version are left untouched, and unavailable or full storage leaves the editor working without saving.
+
 ### Fixed
 
 - Fast horizontal scrolling no longer bounces back at the edge of the rendered theme cards. The catalog strip no longer uses native scroll snapping, and the arrow buttons align a card to the start edge themselves.

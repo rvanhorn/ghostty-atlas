@@ -1,4 +1,5 @@
 import { ConfigDocument } from "./config-document.js";
+import { fields } from "./fields.js";
 import { validateSetting } from "./validation.js";
 
 export const starterConfig =
@@ -15,6 +16,30 @@ export const createConfigState = (
   filename,
 });
 
+/* A snapshot is the plain-data form of the config state that browser storage keeps. */
+export const createConfigSnapshot = (state) => ({
+  source: state.document.source,
+  filename: state.filename,
+  edits: [...state.document.edits],
+  inputs: { ...state.inputs },
+});
+
+// Errors are derived again from the raw inputs so stored data cannot fake validity.
+export const restoreConfigState = (snapshot, filename = snapshot.filename) => {
+  const state = createConfigState(snapshot.source, filename);
+  snapshot.edits.forEach(([key, values]) =>
+    state.document.edits.set(key, [...values]),
+  );
+  Object.entries(snapshot.inputs).forEach(([key, value]) => {
+    const field = fields.find((candidate) => candidate.key === key);
+    if (!field) return;
+    state.inputs[key] = value;
+    const error = validateSetting(field, value);
+    if (error) state.errors[key] = error;
+  });
+  return state;
+};
+
 const cloneDocument = (document) => {
   const nextDocument = new ConfigDocument(document.source);
   nextDocument.edits = new Map(document.edits);
@@ -24,6 +49,8 @@ const cloneDocument = (document) => {
 export const configReducer = (state, action) => {
   if (action.type === "import")
     return createConfigState(action.source, action.filename);
+  if (action.type === "restore")
+    return restoreConfigState(action.snapshot, action.filename);
   if (action.type === "revert")
     return createConfigState(state.document.source, state.filename);
   if (action.type === "reset") {

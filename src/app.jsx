@@ -15,7 +15,9 @@ import { TransferDialog } from "./features/config/transfer-dialog.jsx";
 import { ComparisonView } from "./features/comparison/comparison-view.jsx";
 import { defaultFilters, filterThemes } from "./features/gallery/catalog.js";
 import { updateComparison } from "./features/comparison/comparison-state.js";
+import { DraftRecoveryDialog } from "./features/config/draft-recovery-dialog.jsx";
 import { useConfig } from "./features/config/use-config.js";
+import { useConfigStorage } from "./features/config/use-config-storage.js";
 import { readPreferences, writePreferences } from "./shared/preferences.js";
 
 const getStorage = () => {
@@ -47,6 +49,8 @@ export const App = () => {
   const searchRef = useRef(null);
   const workspaceRef = useRef(null);
   const config = useConfig();
+  const [storage] = useState(getStorage);
+  const configStorage = useConfigStorage(config, storage);
   const setTheme = config.setTheme;
   const activeThemeName = (
     findTheme(config.document.get("theme")) || findTheme("Catppuccin Mocha")
@@ -161,9 +165,16 @@ export const App = () => {
           if (!open) setTransferSession((current) => current + 1);
         }}
         config={config}
+        configStorage={configStorage}
         onImported={() => {
           if (compareEnabled) setComparisonVisible(false);
         }}
+      />
+      <DraftRecoveryDialog
+        draft={configStorage.recoverableDraft}
+        onRestore={configStorage.restoreDraft}
+        onDiscard={configStorage.discardDraft}
+        onLater={configStorage.postponeDraft}
       />
     </div>
   );
