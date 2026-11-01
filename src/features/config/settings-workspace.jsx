@@ -8,11 +8,20 @@ import { SegmentedControl } from "../../components/ui/segmented-control.jsx";
 import { TerminalPreview } from "../../components/terminal-preview.jsx";
 import { previewSamples } from "../../shared/preview-samples.js";
 import { SettingField } from "./setting-field.jsx";
+import { ThemeModeControls } from "./theme-mode-controls.jsx";
+import {
+  describeThemePair,
+  fallbackThemeName,
+  getThemeName,
+  parseThemeValue,
+} from "./theme-value.js";
 
 const categoryOptions = settingCategories.map(({ id, label }) => [id, label]);
 
 export const SettingsWorkspace = ({
   config,
+  previewAppearance,
+  onPreviewAppearanceChange,
   sample,
   onSampleChange,
   compareEnabled,
@@ -24,8 +33,10 @@ export const SettingsWorkspace = ({
     activeCategory.keys.includes(field.key),
   );
   const titlebar = config.document.get("macos-titlebar-style") || "transparent";
-  const configuredTheme = config.document.get("theme");
-  const theme = findTheme(configuredTheme) || findTheme("Catppuccin Mocha");
+  const themeValue = config.document.get("theme");
+  const pairNotes = describeThemePair(themeValue);
+  const previewThemeName = getThemeName(themeValue, previewAppearance);
+  const theme = findTheme(previewThemeName) || findTheme(fallbackThemeName);
 
   return (
     <section
@@ -99,18 +110,32 @@ export const SettingsWorkspace = ({
           inert={compareEnabled}
           aria-hidden={compareEnabled}
         >
+          <ThemeModeControls
+            themeValue={themeValue}
+            appearance={previewAppearance}
+            onAppearanceChange={onPreviewAppearanceChange}
+            onModeChange={(paired) =>
+              config.setThemeMode(paired, previewAppearance)
+            }
+          />
           <TerminalPreview
             theme={theme}
             sample={sample}
             document={config.document}
           />
-          {!findTheme(configuredTheme) && (
-            <p className="preview-note">
-              “{configuredTheme || "Ghostty Default"}” stays in your config.
-              Showing Catppuccin Mocha here because that theme is not in the
-              catalog.
-            </p>
-          )}
+          {parseThemeValue(themeValue).paired
+            ? pairNotes.map((note) => (
+                <p className="preview-note" key={note}>
+                  {note}
+                </p>
+              ))
+            : !findTheme(previewThemeName) && (
+                <p className="preview-note">
+                  “{themeValue || "Ghostty Default"}” stays in your config.
+                  Showing {fallbackThemeName} here because that theme is not in
+                  the catalog.
+                </p>
+              )}
         </section>
         <div
           className="comparison-preview"

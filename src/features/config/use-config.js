@@ -22,8 +22,10 @@ export const useConfig = (initialThemeName = null) => {
     [state.document],
   );
   const snapshot = useMemo(() => createConfigSnapshot(state), [state]);
+  // In a light and dark pair, a pick replaces the member for the previewed appearance.
   const setTheme = useCallback(
-    (themeName) => dispatch({ type: "theme", themeName }),
+    (themeName, appearance) =>
+      dispatch({ type: "theme", themeName, appearance }),
     [],
   );
   return {
@@ -37,6 +39,8 @@ export const useConfig = (initialThemeName = null) => {
     getValue: (key) => state.inputs[key] ?? state.document.get(key),
     updateField: (field, value) => dispatch({ type: "field", field, value }),
     setTheme,
+    setThemeMode: (paired, appearance) =>
+      dispatch({ type: "theme-mode", paired, appearance }),
     resetSection: (keys) => dispatch({ type: "reset", keys }),
     revert: () => dispatch({ type: "revert" }),
     restore: (storedSnapshot, filename) =>

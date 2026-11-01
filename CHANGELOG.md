@@ -11,6 +11,8 @@ All notable changes to Ghostty Atlas are documented here, grouped by release.
 - **Clear Saved Configs** removes the stored draft and presets while keeping bookmarks. Versioned storage records from another Atlas version are left untouched, and unavailable or full storage leaves the editor working without saving.
 - **Share** creates a link to the current theme or two-theme comparison with the preview sample, using theme names rather than catalog numbers and keeping the GitHub Pages project path. Links exclude config text, unknown directives, and file names, and a read-only link field stays selected when clipboard access fails.
 - Opening a shared link applies its theme, or opens the comparison with its sample, and names any unknown theme, sample, or malformed part it ignored. A stored draft is still offered; restoring it keeps the draft's theme and offers to apply the shared one, and saved presets are untouched.
+- **Light & Dark** theme mode configures Ghostty's paired `theme = light:Name,dark:Name` setting. A Light and Dark toggle previews either member, and theme cards set the previewed member. Imported pairs are recognized in either order with surrounding whitespace and stay byte-for-byte unchanged until edited; missing, unlabeled, or uncataloged members are explained while the expression stays as written.
+- Switching to **Single Theme** keeps the previewed member, and switching back to **Light & Dark** restores an imported pair exactly or starts a new pair with the current theme on both sides. In pair mode, **Share** links the previewed member.
 
 ### Fixed
 

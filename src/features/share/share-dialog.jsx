@@ -38,7 +38,9 @@ export const ShareDialog = ({ open, onOpenChange, shareState }) => {
         <p className="transfer-description">
           {shareState.comparing
             ? `Compares ${shareState.left} and ${shareState.right} with the ${sampleLabel} sample.`
-            : `Opens ${shareState.theme} with the ${sampleLabel} sample.`}{" "}
+            : shareState.appearance
+              ? `Opens ${shareState.theme}, the ${shareState.appearance} theme of your pair, with the ${sampleLabel} sample.`
+              : `Opens ${shareState.theme} with the ${sampleLabel} sample.`}{" "}
           Your config, imported text, and file names stay in this browser.
         </p>
         <label className="transfer-label" htmlFor="share-link">

@@ -19,6 +19,11 @@ import { DraftRecoveryDialog } from "./features/config/draft-recovery-dialog.jsx
 import { restoreConfigState } from "./features/config/config-state.js";
 import { useConfig } from "./features/config/use-config.js";
 import { useConfigStorage } from "./features/config/use-config-storage.js";
+import {
+  fallbackThemeName,
+  getThemeName,
+  parseThemeValue,
+} from "./features/config/theme-value.js";
 import { ShareDialog } from "./features/share/share-dialog.jsx";
 import { ShareNotice } from "./features/share/share-notice.jsx";
 import {
@@ -74,9 +79,14 @@ export const App = () => {
   const config = useConfig(sharedLink?.theme);
   const [storage] = useState(getStorage);
   const configStorage = useConfigStorage(config, storage);
+  // Which member of a light and dark pair the preview, theme strip, and share link use.
+  const [previewAppearance, setPreviewAppearance] = useState("dark");
   const setTheme = config.setTheme;
+  const themeValue = config.document.get("theme");
+  const pairedTheme = parseThemeValue(themeValue).paired;
+  const previewThemeName = getThemeName(themeValue, previewAppearance);
   const activeThemeName = (
-    findTheme(config.document.get("theme")) || findTheme("Catppuccin Mocha")
+    findTheme(previewThemeName) || findTheme(fallbackThemeName)
   ).name;
   const filteredThemes = useMemo(
     () => filterThemes(themes, searchQuery, filters, savedThemes),
@@ -97,10 +107,10 @@ export const App = () => {
   }, []);
   const customizeTheme = useCallback(
     (theme) => {
-      setTheme(theme.name);
+      setTheme(theme.name, previewAppearance);
       if (compareEnabled) setComparisonVisible(false);
     },
-    [setTheme, compareEnabled, setComparisonVisible],
+    [setTheme, previewAppearance, compareEnabled, setComparisonVisible],
   );
   const clearFilters = () => {
     setSearchQuery("");
@@ -192,7 +202,7 @@ export const App = () => {
         <ThemeStrip
           themes={filteredThemes}
           sample={sample}
-          selectedThemeName={config.document.get("theme")}
+          selectedThemeName={previewThemeName}
           savedThemes={savedThemes}
           onSelect={customizeTheme}
           onToggleSaved={toggleSaved}
@@ -201,6 +211,8 @@ export const App = () => {
         />
         <SettingsWorkspace
           config={config}
+          previewAppearance={previewAppearance}
+          onPreviewAppearanceChange={setPreviewAppearance}
           sample={sample}
           onSampleChange={setSample}
           compareEnabled={compareEnabled}
@@ -243,7 +255,13 @@ export const App = () => {
                 right: comparison.right.themeName,
                 sample,
               }
-            : { comparing: false, theme: activeThemeName, sample }
+            : {
+                comparing: false,
+                theme: activeThemeName,
+                // A link carries one theme, so a pair shares its previewed member.
+                appearance: pairedTheme ? previewAppearance : null,
+                sample,
+              }
         }
       />
       <DraftRecoveryDialog

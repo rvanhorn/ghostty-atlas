@@ -1,5 +1,6 @@
 import { ConfigDocument } from "./config-document.js";
 import { fields } from "./fields.js";
+import { selectTheme, switchThemeMode } from "./theme-value.js";
 import { validateSetting } from "./validation.js";
 
 export const starterConfig =
@@ -72,7 +73,28 @@ export const configReducer = (state, action) => {
   }
   if (action.type === "theme") {
     const nextDocument = cloneDocument(state.document);
-    nextDocument.set("theme", action.themeName);
+    nextDocument.set(
+      "theme",
+      selectTheme(
+        state.document.get("theme"),
+        action.appearance,
+        action.themeName,
+      ),
+    );
+    return { ...state, document: nextDocument, lastChangedKey: null };
+  }
+  if (action.type === "theme-mode") {
+    const nextDocument = cloneDocument(state.document);
+    // Setting the imported value again drops the edit, so its text stays byte-for-byte.
+    nextDocument.set(
+      "theme",
+      switchThemeMode(
+        state.document.get("theme"),
+        new ConfigDocument(state.document.source).get("theme"),
+        action.paired,
+        action.appearance,
+      ),
+    );
     return { ...state, document: nextDocument, lastChangedKey: null };
   }
   if (action.type !== "field") return state;
