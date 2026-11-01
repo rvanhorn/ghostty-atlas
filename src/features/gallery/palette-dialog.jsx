@@ -1,8 +1,62 @@
 import { useRef, useState } from "react";
-import { Copy, Sparkles } from "lucide-react";
+import { Copy, ListFilter, SunMoon, Sparkles } from "lucide-react";
 import { Modal } from "../../components/ui/modal.jsx";
 import { Button } from "../../components/ui/button.jsx";
+import { themes } from "../../data/themes.js";
 import { ansiColors, getThemeColor, windowColors } from "../palette/palette.js";
+import { getThemeFamily, suggestFamilyPair } from "./theme-families.js";
+
+const appearanceLabels = { light: "Light", dark: "Dark" };
+
+// The theme's light and dark relatives, each opening its own palette here.
+const FamilySection = ({ theme, family, pairMode, onShowTheme, onUsePair }) => {
+  const pair = pairMode && suggestFamilyPair(themes, theme);
+  return (
+    <>
+      <h3 className="palette-group-title" id="palette-family">
+        {family.name} Family
+      </h3>
+      <div
+        className="palette-family"
+        role="group"
+        aria-labelledby="palette-family"
+      >
+        {family.members.map((member) => (
+          <Button
+            key={member.name}
+            className="palette-family-member"
+            aria-pressed={member.name === theme.name}
+            aria-label={`Show ${member.name} Palette`}
+            onClick={() => onShowTheme(member)}
+          >
+            <span
+              className="palette-family-swatch"
+              style={{ background: member.bg, color: member.fg }}
+              aria-hidden="true"
+            >
+              Aa
+            </span>
+            {member.name}
+            <span className="palette-family-appearance">
+              {appearanceLabels[member.appearance] ?? "Dark"}
+            </span>
+          </Button>
+        ))}
+      </div>
+      {pair && (
+        <div className="palette-family-pair">
+          <span>
+            Light: {pair.light} · Dark: {pair.dark}
+          </span>
+          <Button onClick={() => onUsePair(pair)}>
+            <SunMoon size={14} />
+            Use as Light & Dark Pair
+          </Button>
+        </div>
+      )}
+    </>
+  );
+};
 
 const ColorButton = ({ label, color, onCopy }) => (
   <button
@@ -31,6 +85,10 @@ export const PaletteDialog = ({
   onOpenChange,
   onFindSimilar,
   getSimilarFocus,
+  onShowTheme,
+  onShowFamily,
+  pairMode = false,
+  onUsePair,
 }) => {
   const [message, setMessage] = useState("");
   const foundSimilar = useRef(false);
@@ -51,6 +109,8 @@ export const PaletteDialog = ({
     return target || true;
   };
   if (!theme) return null;
+  const family = getThemeFamily(themes, theme);
+  const hasFamily = family && family.members.length > 1;
   return (
     <Modal
       open={open}
@@ -98,10 +158,33 @@ export const PaletteDialog = ({
           />
         ))}
       </div>
+      {hasFamily && (
+        <FamilySection
+          theme={theme}
+          family={family}
+          pairMode={pairMode}
+          onShowTheme={(member) => {
+            setMessage("");
+            onShowTheme(member);
+          }}
+          onUsePair={(pair) => {
+            onUsePair(pair);
+            setMessage(
+              `Your Light & Dark pair is now ${pair.light} and ${pair.dark}.`,
+            );
+          }}
+        />
+      )}
       <p className="transfer-status" role="status">
         {message}
       </p>
       <div className="transfer-actions">
+        {hasFamily && (
+          <Button onClick={() => onShowFamily(family)}>
+            <ListFilter size={14} />
+            Show Family
+          </Button>
+        )}
         <Button
           variant="primary"
           onClick={() => {

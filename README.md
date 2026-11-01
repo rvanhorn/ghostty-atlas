@@ -7,7 +7,8 @@ Browse Ghostty themes, compare terminal palettes, and build a configuration with
 ## What You Can Do
 
 - Search themes by name or catalog number. `7` matches names and numbers containing `7`; `#7` selects catalog number 7 exactly.
-- Combine appearance, palette, contrast, and saved-theme filters.
+- Combine appearance, background tint, accent color, contrast, light and dark family, and saved-theme filters, with a count of matching themes beside each color.
+- See a theme's light and dark family, show only that family, or use its light and dark members as a pair.
 - Sort themes by background brightness or saturation in either direction, or find themes similar to one you like.
 - Inspect a theme's window colors and labeled ANSI colors 0–15, and copy any hex value.
 - Compare two themes with independent previews and lock either side while browsing.
@@ -116,6 +117,17 @@ Import files are limited to 256 KB. Unknown settings are preserved, and invalid 
 - Comments and directives Atlas does not edit.
 
 It never sets Confirm Before Closing to Never, which could close a running process without a warning, and gives Font Family one family rather than a fallback list. **Undo Randomize** steps back one randomization; **Restore Previous Config** returns to the config from before the first randomization, including imported values. Both last until any other edit, and the history is not stored. The randomized config is saved as a draft like any other edit.
+
+## Filters and Theme Families
+
+Within one filter, any selected option matches; across filters, a theme must match every filter. **Background Tint** and **Accent Colors** sort colors into hue families by their OKLCH hue: Red (0–45°), Orange (45–80°), Yellow (80–120°), Green (120–170°), Cyan (170–235°), Blue (235–285°), Purple (285–330°), and Pink (330–360°), or Neutral when a color has too little chroma for its hue to show. Each option shows how many themes it would match with the current search and the other filters.
+
+- **Background Tint** is the background's hue family. A background counts as tinted at an OKLCH chroma of 0.015 or more, so Dracula's and Tokyo Night's dark blue-gray backgrounds count as Blue while Gruvbox Dark's gray and pure black count as Neutral.
+- **Accent Colors** describe what sets a theme's colors apart. ANSI slots follow a convention (slot 1 is red in nearly every theme), so raw chroma would mostly measure the convention: summing it made Red the accent of 596 of 890 themes. Instead, each of ANSI 1–6 and 9–14 and the cursor and selection colors, when its chroma is at least 0.04, scores its chroma divided by the catalog's median chroma for that slot, at most 3, and adds the score to the hue family it actually has. Dracula's blue slot is violet, so it counts for Purple. When a theme has at least one such color, each tinted gray among ANSI 0, 7, 8, 15 and the foreground (chroma 0.015 or more) adds 0.3 to its family, enough to break a near tie, as in Nord's blue-gray palette. A theme belongs to its two highest-scoring families, or to one when it scores at least twice the next; without a chromatic accent color it is Neutral. No family matches more than 40% of the catalog.
+
+Theme families group the light and dark variants of one theme by name. Atlas drops the last variant word (light, dark, day, night, dawn, dusk, or moon) and the words after it, so GitHub Dark Colorblind and GitHub Light Default are both GitHub. A leading variant word is dropped only when another name differs in just that word, so Night Owl and Light Owl form one family. A few named flavors are listed explicitly, such as Catppuccin Latte, Frappe, Macchiato, and Mocha, Kanagawa Dragon, Lotus, and Wave, Modus Operandi and Vivendi, and the Nightfox themes. **Light & Dark Families** shows only themes whose family has both a light and a dark member.
+
+The palette view lists the theme's family; selecting a member opens its palette. **Show Family** narrows the strip to that family until you clear it in the filter bar or reset the filters. In **Light & Dark** theme mode, **Use as Light & Dark Pair** sets the pair to the theme and its counterpart of the other appearance: the member whose name differs only in variant words, such as GitHub Light Colorblind for GitHub Dark Colorblind, or else the family's first member of that appearance.
 
 ## Sorting and Similar Themes
 

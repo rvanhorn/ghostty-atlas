@@ -6,6 +6,7 @@ import {
   defaultFilters,
   countActiveFilters,
 } from "../src/features/gallery/catalog.js";
+import { getColorFacets } from "../src/features/gallery/color-families.js";
 import {
   updateComparison,
   getAdjacentTheme,
@@ -308,27 +309,24 @@ test("copy-on-select options follow the target Ghostty version", () => {
 
 test("filters combine multiple selections with OR within a group and AND across groups", () => {
   const filters = {
+    ...defaultFilters,
     appearance: ["dark", "light"],
-    accent: ["warm", "cool"],
+    tint: ["blue", "neutral"],
+    accents: ["green", "purple"],
     contrast: ["high", "balanced"],
-    savedOnly: false,
   };
   const expected = themes.filter(
     (theme) =>
-      ["warm", "cool"].includes(theme.accent) &&
+      ["blue", "neutral"].includes(getColorFacets(theme).tint) &&
+      getColorFacets(theme).accents.some((family) =>
+        ["green", "purple"].includes(family),
+      ) &&
       ["high", "balanced"].includes(theme.contrast),
   );
+  assert.ok(expected.length > 0 && expected.length < themes.length);
   assert.deepEqual(filterThemes(themes, "", filters, []), expected);
-  assert.equal(countActiveFilters(filters), 3);
-  assert.equal(
-    countActiveFilters({
-      appearance: [],
-      accent: [],
-      contrast: [],
-      savedOnly: false,
-    }),
-    0,
-  );
+  assert.equal(countActiveFilters(filters), 4);
+  assert.equal(countActiveFilters(defaultFilters), 0);
   assert.equal(
     filterThemes(
       themes,

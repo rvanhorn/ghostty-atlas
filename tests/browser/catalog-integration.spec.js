@@ -4,6 +4,15 @@ import {
   rankSimilarThemes,
   sortThemes,
 } from "../../src/features/gallery/discovery.js";
+import {
+  countColorOptions,
+  defaultFilters,
+  filterThemes,
+} from "../../src/features/gallery/catalog.js";
+import {
+  getFamilyKey,
+  groupThemeFamilies,
+} from "../../src/features/gallery/theme-families.js";
 
 test("the larger catalog still mounts a bounded range and reaches its last theme", async ({
   page,
@@ -246,6 +255,156 @@ test("search and filters narrow the catalog and bookmarks survive a reload", asy
   await expect(
     strip.getByRole("button", { name: `Unsave ${bookmarked}`, exact: true }),
   ).toHaveAttribute("aria-pressed", "true");
+});
+
+/* Requirement, finer color filters: Background Tint and Accent Colors list hue
+   families with a count of matching themes given the other active filters,
+   open, select, and close from the keyboard, combine with OR inside a filter
+   and AND across filters, and Reset Filters clears them. Results stay
+   interactive while the panel is open (docs/acceptance.md, live filters). */
+test("color filters show counts, work from the keyboard, and combine with other filters", async ({
+  page,
+}) => {
+  await page.goto("/tests/browser/app.fixture.html");
+  const strip = page.getByRole("region", {
+    name: "Theme Catalog",
+    exact: true,
+  });
+  const resultCount = page
+    .getByRole("status")
+    .filter({ hasText: /^\d+ Themes$/ });
+  await page.getByRole("button", { name: "Filter", exact: true }).click();
+
+  const tint = page.getByRole("combobox", {
+    name: "Background Tint",
+    exact: true,
+  });
+  const initialCounts = countColorOptions(themes, "", defaultFilters, []);
+  await tint.focus();
+  await page.keyboard.press("Enter");
+  const blue = page.getByRole("option", { name: /^Blue/ });
+  await expect(blue).toHaveText(`Blue${initialCounts.tint.blue}`);
+  await expect(page.getByRole("option", { name: /^Neutral/ })).toHaveText(
+    `Neutral${initialCounts.tint.neutral}`,
+  );
+  // Typeahead highlights the option, as in a native select.
+  await page.keyboard.type("Blue");
+  await expect(blue).toHaveAttribute("data-highlighted", "");
+  await page.keyboard.press("Enter");
+  await page.keyboard.press("Escape");
+  await expect(blue).toHaveCount(0);
+  await expect(tint).toBeFocused();
+  await expect(tint).toHaveText("Blue");
+  const blueFilters = { ...defaultFilters, tint: ["blue"] };
+  await expect(resultCount).toHaveText(
+    `${filterThemes(themes, "", blueFilters, []).length} Themes`,
+  );
+
+  // Two accent families widen the results; the counts reflect the tint filter.
+  const accents = page.getByRole("combobox", {
+    name: "Accent Colors",
+    exact: true,
+  });
+  await accents.click();
+  const blueCounts = countColorOptions(themes, "", blueFilters, []);
+  for (const label of ["Purple", "Pink"]) {
+    const option = page.getByRole("option", { name: new RegExp(`^${label}`) });
+    await expect(option).toHaveText(
+      `${label}${blueCounts.accents[label.toLowerCase()]}`,
+    );
+    await option.click();
+  }
+  await page.keyboard.press("Escape");
+  await expect(accents).toHaveText("2 Selected");
+  const combined = filterThemes(
+    themes,
+    "",
+    { ...blueFilters, accents: ["purple", "pink"] },
+    [],
+  );
+  expect(combined.length).toBeGreaterThanOrEqual(
+    Math.max(blueCounts.accents.purple, blueCounts.accents.pink),
+  );
+  await expect(resultCount).toHaveText(`${combined.length} Themes`);
+  const firstCard = strip.locator(".theme-card-pick").first();
+  await expect(firstCard).toHaveAccessibleName(`Select ${combined[0].name}`);
+  await firstCard.click();
+  await expect(firstCard).toHaveAttribute("aria-pressed", "true");
+
+  await page.getByRole("button", { name: "Reset Filters" }).click();
+  await expect(resultCount).toHaveText(`${themes.length} Themes`);
+  await expect(tint).toHaveText("Any Tint");
+});
+
+/* Requirement, theme families: the palette view lists a theme's family members
+   and opens their palettes, Show Family narrows the strip to the family until
+   cleared, Light & Dark Families keeps only families with both appearances,
+   and in Light & Dark mode one step sets the pair to the family's members. */
+test("theme families open members, filter the strip, and set a light and dark pair", async ({
+  page,
+}) => {
+  await page.goto("/tests/browser/app.fixture.html");
+  await page.getByRole("button", { name: "Import / Export" }).click();
+  await page.getByRole("tab", { name: "Import", exact: true }).click();
+  await page
+    .getByLabel("Config to Import")
+    .fill("theme = light:Nord Light,dark:Nord\n");
+  await page.getByRole("button", { name: "Import Config" }).click();
+
+  const strip = page.getByRole("region", {
+    name: "Theme Catalog",
+    exact: true,
+  });
+  const resultCount = page
+    .getByRole("status")
+    .filter({ hasText: /^\d+ Themes$/ });
+  const search = page.getByRole("searchbox", { name: "Search Themes" });
+  await search.fill("Catppuccin Mocha");
+  await strip
+    .getByRole("button", { name: "Show Catppuccin Mocha Palette" })
+    .click();
+  let dialog = page.getByRole("dialog", { name: "Catppuccin Mocha Palette" });
+  const family = dialog.getByRole("group", { name: "Catppuccin Family" });
+  await expect(family.getByRole("button")).toHaveCount(4);
+  await expect(
+    family.getByRole("button", { name: "Show Catppuccin Mocha Palette" }),
+  ).toHaveAttribute("aria-pressed", "true");
+
+  await dialog
+    .getByRole("button", { name: "Use as Light & Dark Pair" })
+    .click();
+  await expect(dialog.getByRole("status")).toHaveText(
+    "Your Light & Dark pair is now Catppuccin Latte and Catppuccin Mocha.",
+  );
+
+  await family
+    .getByRole("button", { name: "Show Catppuccin Latte Palette" })
+    .click();
+  dialog = page.getByRole("dialog", { name: "Catppuccin Latte Palette" });
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole("button", { name: "Show Family" }).click();
+  await expect(dialog).toHaveCount(0);
+  await search.fill("");
+  const catppuccin = groupThemeFamilies(themes).get(
+    getFamilyKey("Catppuccin Mocha"),
+  ).members;
+  await expect(resultCount).toHaveText(`${catppuccin.length} Themes`);
+  await expect(strip.locator(".theme-card-pick")).toHaveText(
+    catppuccin.map(({ name }) => new RegExp(name)),
+  );
+  await page.getByRole("button", { name: "Clear Family Filter" }).click();
+  await expect(resultCount).toHaveText(`${themes.length} Themes`);
+
+  await page.getByRole("switch", { name: "Light & Dark Families" }).click();
+  await expect(resultCount).toHaveText(
+    `${filterThemes(themes, "", { ...defaultFilters, lightAndDark: true }, []).length} Themes`,
+  );
+
+  await page.getByRole("button", { name: "Import / Export" }).click();
+  await page.getByRole("tab", { name: "Export", exact: true }).click();
+  await expect(page.getByLabel("Config to Export")).toHaveValue(
+    "theme = light:Catppuccin Latte,dark:Catppuccin Mocha\n",
+  );
 });
 
 /* Issue #8, "Check keyboard access and focus behavior for primary controls and the

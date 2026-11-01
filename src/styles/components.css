@@ -131,6 +131,35 @@
 .select-option[data-selected] {
   color: #ffffff;
 }
+/* Options with a swatch or a count keep the check mark in a fixed column so
+   the counts stay aligned as options are selected. */
+.select-option--detailed {
+  position: relative;
+  justify-content: flex-start;
+  gap: var(--space-2);
+  padding-right: 34px;
+}
+.select-option-swatch {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  border-radius: var(--radius-control);
+  box-shadow: inset 0 0 0 1px #ffffff26;
+}
+.select-option--detailed .select-option-text {
+  flex: 1;
+}
+.select-option-count {
+  min-width: 3ch;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+.select-option--detailed .select-option-indicator {
+  position: absolute;
+  right: 12px;
+  display: flex;
+}
 .menu-popup .select-option {
   justify-content: flex-start;
   gap: 8px;

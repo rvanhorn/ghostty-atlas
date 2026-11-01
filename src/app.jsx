@@ -13,7 +13,12 @@ import { ThemeStrip } from "./features/gallery/theme-strip.jsx";
 import { SettingsWorkspace } from "./features/config/settings-workspace.jsx";
 import { TransferDialog } from "./features/config/transfer-dialog.jsx";
 import { ComparisonView } from "./features/comparison/comparison-view.jsx";
-import { defaultFilters, filterThemes } from "./features/gallery/catalog.js";
+import {
+  countColorOptions,
+  defaultFilters,
+  filterThemes,
+} from "./features/gallery/catalog.js";
+import { groupThemeFamilies } from "./features/gallery/theme-families.js";
 import { defaultSort, sortThemes } from "./features/gallery/discovery.js";
 import { PaletteDialog } from "./features/gallery/palette-dialog.jsx";
 import { updateComparison } from "./features/comparison/comparison-state.js";
@@ -108,6 +113,11 @@ export const App = () => {
       sortThemes(filterThemes(themes, searchQuery, filters, savedThemes), sort),
     [searchQuery, filters, savedThemes, sort],
   );
+  // Menu counts for the color filters; color facets are cached per theme, so this stays cheap.
+  const colorOptionCounts = useMemo(
+    () => countColorOptions(themes, searchQuery, filters, savedThemes),
+    [searchQuery, filters, savedThemes],
+  );
   const showPalette = useCallback((theme) => {
     setPaletteTheme(theme);
     setPaletteOpen(true);
@@ -116,6 +126,16 @@ export const App = () => {
     setSort({ order: "similar", similarTo: theme.name });
     setPaletteOpen(false);
     setFiltersOpen(true);
+  };
+  // Show Family narrows the strip to one family and opens the filters so the family can be cleared.
+  const showFamily = (family) => {
+    setFilters((current) => ({ ...current, family: family.key }));
+    setPaletteOpen(false);
+    setFiltersOpen(true);
+  };
+  const applyFamilyPair = (pair) => {
+    setTheme(pair.light, "light");
+    setTheme(pair.dark, "dark");
   };
   const toggleSaved = useCallback(
     (themeName) =>
@@ -230,6 +250,11 @@ export const App = () => {
           onFilterChange={(key, value) =>
             setFilters((current) => ({ ...current, [key]: value }))
           }
+          optionCounts={colorOptionCounts}
+          familyName={
+            filters.family &&
+            groupThemeFamilies(themes).get(filters.family)?.name
+          }
           sort={sort}
           onSortChange={setSort}
           onReset={() => setFilters(defaultFilters)}
@@ -297,6 +322,10 @@ export const App = () => {
         onOpenChange={setPaletteOpen}
         onFindSimilar={findSimilar}
         getSimilarFocus={() => document.getElementById("theme-sort")}
+        onShowTheme={setPaletteTheme}
+        onShowFamily={showFamily}
+        pairMode={pairedTheme}
+        onUsePair={applyFamilyPair}
       />
       <ShareDialog
         open={shareOpen}
