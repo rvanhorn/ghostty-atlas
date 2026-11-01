@@ -122,8 +122,10 @@ test("fast wheel bursts reach unseen themes in both directions without pull-back
       await settledOffset();
     }
     const start = await offset();
-    for (let burst = 0; burst < 6; burst++) {
-      await page.mouse.wheel(direction * 1500, 0);
+    // Firefox scrolls at most about one viewport width per wheel event, so
+    // each burst stays under the 1280px viewport.
+    for (let burst = 0; burst < 9; burst++) {
+      await page.mouse.wheel(direction * 1000, 0);
     }
     await settledOffset();
     expect(await offset()).toBe(start + direction * 9000);
