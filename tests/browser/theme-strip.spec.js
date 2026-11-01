@@ -81,6 +81,56 @@ test("bounds mounting, preserves full list metadata, and covers both scroll dire
   await expect(viewport(page)).toHaveAttribute("data-fade-left", "false");
 });
 
+// Issue #15: fast scrolling into unmounted themes must land where the input
+// sent it instead of being pulled back toward the rendered range.
+test("fast wheel bursts reach unseen themes in both directions without pull-back", async ({
+  page,
+}) => {
+  const settledOffset = () =>
+    expect
+      .poll(
+        async () => {
+          const first = await viewport(page).evaluate((e) => e.scrollLeft);
+          await page.waitForTimeout(150);
+          const second = await viewport(page).evaluate((e) => e.scrollLeft);
+          return first === second ? second : null;
+        },
+        { timeout: 5000 },
+      )
+      .not.toBeNull();
+  const offset = () => viewport(page).evaluate((element) => element.scrollLeft);
+  const fillsViewport = () =>
+    viewport(page).evaluate((element) => {
+      const bounds = element.getBoundingClientRect();
+      const visible = [...element.querySelectorAll(".theme-strip-item")]
+        .map((item) => item.getBoundingClientRect())
+        .filter((rect) => rect.right > bounds.left && rect.left < bounds.right);
+      return (
+        visible.length > 0 &&
+        Math.min(...visible.map((rect) => rect.left)) <= bounds.left + 16 &&
+        Math.max(...visible.map((rect) => rect.right)) >= bounds.right - 16
+      );
+    });
+  const box = await viewport(page).boundingBox();
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+
+  for (const direction of [1, -1]) {
+    if (direction < 0) {
+      await viewport(page).evaluate((element) => {
+        element.scrollLeft = element.scrollWidth;
+      });
+      await settledOffset();
+    }
+    const start = await offset();
+    for (let burst = 0; burst < 6; burst++) {
+      await page.mouse.wheel(direction * 1500, 0);
+    }
+    await settledOffset();
+    expect(await offset()).toBe(start + direction * 9000);
+    await expect.poll(fillsViewport).toBe(true);
+  }
+});
+
 test("keyboard navigation reaches unmounted themes and clamps at catalog edges", async ({
   page,
 }) => {
@@ -230,6 +280,16 @@ test("bookmarks and sample updates survive unmounting; reduced-motion arrows wor
   await expect
     .poll(() => viewport(page).evaluate((element) => element.scrollLeft))
     .toBeGreaterThan(0);
+  // Without native snapping, the arrows still stop with a card at the start edge.
+  expect(
+    await viewport(page).evaluate((element) => {
+      const bounds = element.getBoundingClientRect();
+      return [...element.querySelectorAll(".theme-strip-item")].some(
+        (item) =>
+          Math.abs(item.getBoundingClientRect().left - bounds.left - 16) < 1,
+      );
+    }),
+  ).toBe(true);
   await page.getByRole("button", { name: "Code Sample" }).click();
   await page.getByRole("button", { name: "Select Last", exact: true }).click();
   await pick(page, themes.length - 1).focus();

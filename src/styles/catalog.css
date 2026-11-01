@@ -22,7 +22,6 @@
   min-width: 0;
   overflow-x: auto;
   overflow-y: hidden;
-  scroll-snap-type: x proximity;
   scroll-padding-inline: 16px;
   padding: 4px 0 16px;
   overscroll-behavior-x: contain;
@@ -34,7 +33,6 @@
   position: absolute;
   top: 0;
   height: 100%;
-  scroll-snap-align: start;
 }
 .theme-strip-item .theme-card {
   width: 100%;

@@ -2,6 +2,12 @@
 
 All notable changes to Ghostty Atlas are documented here, grouped by release.
 
+## Unreleased
+
+### Fixed
+
+- Fast horizontal scrolling no longer bounces back at the edge of the rendered theme cards. The catalog strip no longer uses native scroll snapping, and the arrow buttons align a card to the start edge themselves.
+
 ## 1.1.0 - 2026-10-04
 
 ### Changed
