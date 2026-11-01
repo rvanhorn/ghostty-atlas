@@ -3,6 +3,10 @@ export const previewSamples = [
   ["shell", "Shell"],
   ["code", "Code"],
   ["text", "Typography"],
+  ["ansi", "ANSI Colors"],
+  ["diff", "Git Diff"],
+  ["log", "Dense Log"],
+  ["tui", "Terminal UI"],
 ];
 
 export const getSampleLabel = (sample) =>

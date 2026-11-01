@@ -5,6 +5,7 @@ import { settingCategories } from "./categories.js";
 import { findTheme } from "../../data/themes.js";
 import { Button } from "../../components/ui/button.jsx";
 import { SegmentedControl } from "../../components/ui/segmented-control.jsx";
+import { SelectControl } from "../../components/ui/select.jsx";
 import { TerminalPreview } from "../../components/terminal-preview.jsx";
 import { previewSamples } from "../../shared/preview-samples.js";
 import { SettingField } from "./setting-field.jsx";
@@ -52,7 +53,7 @@ export const SettingsWorkspace = ({
         <div className="settings-toolbar">
           <div className="settings-heading">
             <h1>Configuration</h1>
-            <SegmentedControl
+            <SelectControl
               label="Preview Sample"
               value={sample}
               options={previewSamples}

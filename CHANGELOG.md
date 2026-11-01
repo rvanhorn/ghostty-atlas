@@ -17,9 +17,11 @@ All notable changes to Ghostty Atlas are documented here, grouped by release.
 - **Export Theme File** downloads a Ghostty theme file with the edited colors and explains where to save it and how to reference it with `theme = <name>` or an absolute path. **Import Theme File** applies the colors of a theme file, including one exported from Atlas.
 - A palette button on each theme card opens the theme's window colors and labeled ANSI colors 0–15; selecting a color, by pointer or keyboard, copies its hex value.
 - **Find Similar Themes** ranks the other themes by how close their background, foreground, and ANSI colors are in the OKLab color space, with ties ordered by name. A **Sort** control in the filter bar also orders themes by background brightness or saturation in either direction. Sorting applies after search and filters narrow the list.
+- **ANSI Colors**, **Git Diff**, **Dense Log**, and **Terminal UI** preview samples. The ANSI sample labels all 16 colors, including bright variants, as text, bold text, and background blocks; the others show Git status, diff, and graph colors, leveled log output with a stack trace, and a box-drawn process monitor. Samples use bold, dim, italic, underline, and inverse text, both comparison sides show the same sample, and share links carry the new samples as `ansi`, `diff`, `log`, and `tui`.
 
 ### Changed
 
+- **Preview Sample** is a menu instead of a row of buttons so all seven samples fit at narrow widths.
 - The configuration preview applies the config's own `background`, `foreground`, `cursor-color`, `cursor-text`, `selection-background`, `selection-foreground`, and `palette` settings over the theme, as Ghostty does. Imported configs with these settings now preview the colors Ghostty shows; color names Atlas cannot read are listed and keep the theme color.
 
 ### Fixed

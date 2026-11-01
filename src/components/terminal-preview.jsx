@@ -57,6 +57,10 @@ export const TerminalPreview = ({
         textColor(color),
       ]),
     ),
+    // Minimum contrast changes text only, so color blocks keep the palette color.
+    ...Object.fromEntries(
+      theme.palette.map((color, index) => [`--ansi-bg-${index}`, color]),
+    ),
   };
   const tabs = (
     <div
@@ -147,9 +151,13 @@ export const TerminalPreview = ({
                 <Popover.Description>
                   Fonts depend on browser availability. Blur, contrast, and
                   window chrome are approximations; font size and padding use a
-                  1:1 logical-pixel scale. Behavior settings marked “Config
-                  Only” are saved to your config but cannot run in this static
-                  sample. Reduced motion disables cursor blinking.
+                  1:1 logical-pixel scale. Box-drawing and block characters come
+                  from the browser font, while Ghostty draws them itself, so
+                  line joins and weights can differ. Bold, italic, dim,
+                  underline, and inverse text use browser styles. Behavior
+                  settings marked “Config Only” are saved to your config but
+                  cannot run in this static sample. Reduced motion disables
+                  cursor blinking.
                   {fontNotice && (
                     <span className="field-preview-note">{fontNotice}</span>
                   )}

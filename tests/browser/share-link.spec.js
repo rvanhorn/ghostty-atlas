@@ -12,10 +12,8 @@ const previewTitle = (page, name) =>
     .getByRole("region", { name: "Configuration Terminal", exact: true })
     .getByText(`${name} · zsh`, { exact: true });
 
-const sampleTab = (page, name) =>
-  page
-    .getByRole("tablist", { name: "Preview Sample" })
-    .getByRole("tab", { name, exact: true });
+const sampleSelect = (page) =>
+  page.getByRole("combobox", { name: "Preview Sample", exact: true });
 
 test("a comparison link opens both themes in comparison mode with its sample", async ({
   page,
@@ -30,10 +28,7 @@ test("a comparison link opens both themes in comparison mode with its sample", a
   await expect(
     page.getByRole("combobox", { name: "Right Theme", exact: true }),
   ).toHaveValue(getThemeLabel("Dracula"));
-  await expect(sampleTab(page, "Code")).toHaveAttribute(
-    "aria-selected",
-    "true",
-  );
+  await expect(sampleSelect(page)).toHaveText("Code");
   await expect(page).toHaveURL(new RegExp(`${fixture}$`));
 });
 
@@ -82,10 +77,7 @@ test("unknown themes and samples are named in a notice and Atlas keeps working",
   await expect(notice).toContainText(
     "Part of the shared link was ignored: unknown theme “No Such Theme”; unknown preview sample “video”.",
   );
-  await expect(sampleTab(page, "Shell")).toHaveAttribute(
-    "aria-selected",
-    "true",
-  );
+  await expect(sampleSelect(page)).toHaveText("Shell");
   await expect(previewTitle(page, "Catppuccin Mocha")).toBeVisible();
   await notice
     .getByRole("button", { name: "Dismiss Shared Link Notice" })
@@ -111,7 +103,8 @@ test("share links leave config contents out and stay selectable when copying fai
     buffer: Buffer.from("# private note\nfuture-key = value\ntheme = Nord\n"),
   });
   await page.getByRole("button", { name: "Import Config" }).click();
-  await sampleTab(page, "Typography").click();
+  await sampleSelect(page).click();
+  await page.getByRole("option", { name: "Typography", exact: true }).click();
 
   await page.getByRole("button", { name: "Share", exact: true }).click();
   const dialog = page.getByRole("dialog", { name: "Share This View" });
@@ -141,10 +134,7 @@ test("share links leave config contents out and stay selectable when copying fai
   const recipientPage = await recipient.newPage();
   await recipientPage.goto(singleLink);
   await expect(previewTitle(recipientPage, "Nord")).toBeVisible();
-  await expect(sampleTab(recipientPage, "Typography")).toHaveAttribute(
-    "aria-selected",
-    "true",
-  );
+  await expect(sampleSelect(recipientPage)).toHaveText("Typography");
   await expect(recipientPage.getByRole("dialog")).toHaveCount(0);
   await recipient.close();
 });

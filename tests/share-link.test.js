@@ -53,6 +53,21 @@ test("single-theme and comparison links round-trip by theme name at the Pages pa
   });
 });
 
+// Issue #6, "Add representative terminal preview samples": the new samples are shareable.
+test("the ANSI, Git diff, dense log, and terminal UI samples round-trip in links", () => {
+  for (const sample of ["ansi", "diff", "log", "tui"]) {
+    const link = createShareUrl(pagesHref, {
+      comparing: true,
+      left: "Nord",
+      right: "Dracula",
+      sample,
+    });
+    const parsed = parseShareLink(new URL(link).search);
+    assert.equal(parsed.sample, sample);
+    assert.deepEqual(parsed.ignored, []);
+  }
+});
+
 test("catalog numbers and unknown names are ignored and named for the user", () => {
   const number = String(getThemeNumber("Nord"));
   const result = parseShareLink(`?theme=%23${number}&sample=video`);

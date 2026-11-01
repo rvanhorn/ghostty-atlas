@@ -623,6 +623,10 @@
   background: var(--terminal-selection);
   color: var(--terminal-selection-text);
 }
+.terminal-inverse {
+  background: var(--terminal-inverse, var(--terminal-fg));
+  color: var(--terminal-bg);
+}
 .terminal-palette {
   display: flex;
   padding: 0 24px 24px;
