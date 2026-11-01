@@ -35,6 +35,7 @@ import {
   removeShareParams,
 } from "./features/share/share-link.js";
 import { readPreferences, writePreferences } from "./shared/preferences.js";
+import { compactLayoutQuery, useMediaQuery } from "./hooks/use-media-query.js";
 
 const getStorage = () => {
   try {
@@ -82,6 +83,10 @@ export const App = () => {
   const [transferSession, setTransferSession] = useState(0);
   const searchRef = useRef(null);
   const workspaceRef = useRef(null);
+  // Compact layouts edit settings in a drawer so the preview keeps the screen.
+  const compactLayout = useMediaQuery(compactLayoutQuery);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const settingsButtonRef = useRef(null);
   const config = useConfig(sharedLink?.theme);
   const [storage] = useState(getStorage);
   const configStorage = useConfigStorage(config, storage);
@@ -181,6 +186,10 @@ export const App = () => {
   return (
     <div className="app-shell">
       <AppHeader
+        compact={compactLayout}
+        settingsOpen={settingsOpen}
+        settingsButtonRef={settingsButtonRef}
+        onSettings={() => setSettingsOpen(true)}
         compareEnabled={compareEnabled}
         searchQuery={searchQuery}
         onSearchChange={(value) => {
@@ -239,6 +248,10 @@ export const App = () => {
         />
         <SettingsWorkspace
           config={config}
+          compact={compactLayout}
+          settingsOpen={compactLayout && settingsOpen}
+          onSettingsOpenChange={setSettingsOpen}
+          settingsButtonRef={settingsButtonRef}
           previewAppearance={previewAppearance}
           onPreviewAppearanceChange={setPreviewAppearance}
           compatibilityTarget={compatibilityTarget}

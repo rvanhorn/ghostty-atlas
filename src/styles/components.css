@@ -131,6 +131,11 @@
 .select-option[data-selected] {
   color: #ffffff;
 }
+.menu-popup .select-option {
+  justify-content: flex-start;
+  gap: 8px;
+  min-height: 44px;
+}
 .switch-label {
   display: flex;
   align-items: center;

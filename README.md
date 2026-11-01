@@ -20,6 +20,7 @@ Browse Ghostty themes, compare terminal palettes, and build a configuration with
 - Import an existing config without losing untouched comments, unknown directives, or line endings.
 - Copy or download the result, or download a macOS and Linux installation script that backs up the existing config before replacing it. The script replaces the config file Ghostty already reads, including one in `~/.config/ghostty` on macOS, and names a new file `config.ghostty`, or `config` for a Ghostty 1.2 or earlier target.
 - Recover an unfinished config after a reload, and save, load, rename, and delete named presets such as Laptop, Work, and Presentation.
+- Browse, compare, and configure on a phone. At 800px and narrower, and on phones in landscape, the theme strip and preview fill the page, **Settings** opens the configuration in a drawer with a **Category** menu, **Share** and **Import / Export** move into a **More Actions** menu, and comparisons stack their two previews.
 
 The app uses React, Base UI, Vite, and bundled Geist fonts. Theme previews retain each terminal palette; the app interface has its own dark palette.
 

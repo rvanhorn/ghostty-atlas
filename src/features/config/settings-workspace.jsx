@@ -5,6 +5,7 @@ import { settingCategories } from "./categories.js";
 import { getPreviewRequirement } from "./preview-support.js";
 import { findTheme } from "../../data/themes.js";
 import { Button } from "../../components/ui/button.jsx";
+import { Modal } from "../../components/ui/modal.jsx";
 import { SegmentedControl } from "../../components/ui/segmented-control.jsx";
 import { SelectControl } from "../../components/ui/select.jsx";
 import { TerminalPreview } from "../../components/terminal-preview.jsx";
@@ -25,6 +26,10 @@ const categoryOptions = settingCategories.map(({ id, label }) => [id, label]);
 
 export const SettingsWorkspace = ({
   config,
+  compact,
+  settingsOpen,
+  onSettingsOpenChange,
+  settingsButtonRef,
   previewAppearance,
   onPreviewAppearanceChange,
   compatibilityTarget,
@@ -54,121 +59,166 @@ export const SettingsWorkspace = ({
   const colorOverrides = readColorOverrides(config.document);
   const previewTheme = applyColorOverrides(theme, colorOverrides.colors);
 
-  return (
-    <section
-      className={`settings-workspace ${compareEnabled ? "settings-workspace--comparing" : ""}`}
-      aria-label="Theme Customization"
-    >
-      <section className="settings-panel" aria-label="Configuration">
-        <div className="settings-toolbar">
-          <div className="settings-heading">
-            <h1>Configuration</h1>
-            <div className="settings-heading-actions">
+  const sampleSelect = (
+    <SelectControl
+      label="Preview Sample"
+      value={sample}
+      options={previewSamples}
+      onValueChange={onSampleChange}
+    />
+  );
+  const settingsPanel = (
+    <section className="settings-panel" aria-label="Configuration">
+      <div className="settings-toolbar">
+        <div className="settings-heading">
+          {/* The drawer's own title names the settings on compact layouts. */}
+          {!compact && <h1>Configuration</h1>}
+          <div className="settings-heading-actions">
+            <Button
+              onClick={onRandomize}
+              title="Pick a random catalog theme and random values for nearly every setting"
+            >
+              <Shuffle size={16} />
+              Randomize
+            </Button>
+            {!compact && sampleSelect}
+          </div>
+        </div>
+        <div className="randomize-run">
+          <p className="randomize-status" role="status">
+            {randomCount
+              ? `Randomized ${randomCount === 1 ? "once" : `${randomCount} times`}. Theme: ${themeValue}`
+              : restored
+                ? "Restored your configuration from before randomizing."
+                : ""}
+          </p>
+          {randomCount > 0 && (
+            <>
               <Button
-                onClick={onRandomize}
-                title="Pick a random catalog theme and random values for nearly every setting"
+                variant="quiet"
+                onClick={() => {
+                  if (randomCount === 1)
+                    setRestoredDocument(config.randomHistory[0].document);
+                  config.undoRandomize();
+                }}
+                title="Go back one randomization"
               >
-                <Shuffle size={16} />
-                Randomize
+                <Undo2 size={16} />
+                Undo Randomize
               </Button>
+              <Button
+                variant="quiet"
+                onClick={() => {
+                  setRestoredDocument(config.randomHistory[0].document);
+                  config.restoreBeforeRandomize();
+                }}
+                title="Return to the configuration you had before you started randomizing"
+              >
+                <History size={16} />
+                Restore Previous Config
+              </Button>
+            </>
+          )}
+        </div>
+        <div className="settings-navigation">
+          {compact ? (
+            // A drawer is too narrow for nine tabs, so a menu lists every category.
+            <div className="settings-category">
+              <label htmlFor="settings-category">Category</label>
               <SelectControl
-                label="Preview Sample"
-                value={sample}
-                options={previewSamples}
-                onValueChange={onSampleChange}
+                id="settings-category"
+                label="Configuration Category"
+                value={category}
+                options={categoryOptions}
+                onValueChange={setCategory}
               />
             </div>
-          </div>
-          <div className="randomize-run">
-            <p className="randomize-status" role="status">
-              {randomCount
-                ? `Randomized ${randomCount === 1 ? "once" : `${randomCount} times`}. Theme: ${themeValue}`
-                : restored
-                  ? "Restored your configuration from before randomizing."
-                  : ""}
-            </p>
-            {randomCount > 0 && (
-              <>
-                <Button
-                  variant="quiet"
-                  onClick={() => {
-                    if (randomCount === 1)
-                      setRestoredDocument(config.randomHistory[0].document);
-                    config.undoRandomize();
-                  }}
-                  title="Go back one randomization"
-                >
-                  <Undo2 size={16} />
-                  Undo Randomize
-                </Button>
-                <Button
-                  variant="quiet"
-                  onClick={() => {
-                    setRestoredDocument(config.randomHistory[0].document);
-                    config.restoreBeforeRandomize();
-                  }}
-                  title="Return to the configuration you had before you started randomizing"
-                >
-                  <History size={16} />
-                  Restore Previous Config
-                </Button>
-              </>
-            )}
-          </div>
-          <div className="settings-navigation">
+          ) : (
             <SegmentedControl
               label="Configuration Category"
               value={category}
               options={categoryOptions}
               onValueChange={setCategory}
             />
-            <Button
-              variant="quiet"
-              className="icon-button"
-              onClick={() => config.resetSection(activeCategory.keys)}
-              title="Restore this section to your imported or starter values"
-              aria-label={`Reset ${activeCategory.label} Configuration`}
-            >
-              <RotateCcw size={16} />
-            </Button>
-          </div>
-        </div>
-        <div className="settings-fields-scroll">
-          {category === "palette" ? (
-            <PaletteEditor
-              config={config}
-              sourceTheme={theme}
-              previewTheme={previewTheme}
-              overrides={colorOverrides}
-              paired={parseThemeValue(themeValue).paired}
-              themeValue={themeValue}
-              previewAppearance={previewAppearance}
-            />
-          ) : (
-            <div className="settings-fields">
-              {visibleFields.map((field) => (
-                <SettingField
-                  key={field.key}
-                  field={fieldForTarget(field, compatibilityTarget)}
-                  previewRequirement={getPreviewRequirement(
-                    field.key,
-                    config.document,
-                    platform,
-                  )}
-                  value={config.getValue(field.key)}
-                  compatibility={checkSetting(
-                    field.key,
-                    config.document.values(field.key),
-                    compatibilityTarget,
-                  )}
-                  error={config.errors[field.key]}
-                  onChange={config.updateField}
-                />
-              ))}
-            </div>
           )}
+          <Button
+            variant="quiet"
+            className="icon-button"
+            onClick={() => config.resetSection(activeCategory.keys)}
+            title="Restore this section to your imported or starter values"
+            aria-label={`Reset ${activeCategory.label} Configuration`}
+          >
+            <RotateCcw size={16} />
+          </Button>
         </div>
-      </section>
+      </div>
+      <div className="settings-fields-scroll">
+        {category === "palette" ? (
+          <PaletteEditor
+            config={config}
+            sourceTheme={theme}
+            previewTheme={previewTheme}
+            overrides={colorOverrides}
+            paired={parseThemeValue(themeValue).paired}
+            themeValue={themeValue}
+            previewAppearance={previewAppearance}
+          />
+        ) : (
+          <div className="settings-fields">
+            {visibleFields.map((field) => (
+              <SettingField
+                key={field.key}
+                field={fieldForTarget(field, compatibilityTarget)}
+                previewRequirement={getPreviewRequirement(
+                  field.key,
+                  config.document,
+                  platform,
+                )}
+                value={config.getValue(field.key)}
+                compatibility={checkSetting(
+                  field.key,
+                  config.document.values(field.key),
+                  compatibilityTarget,
+                )}
+                error={config.errors[field.key]}
+                onChange={config.updateField}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
+  );
+
+  return (
+    <section
+      className={`settings-workspace ${compareEnabled ? "settings-workspace--comparing" : ""}`}
+      aria-label="Theme Customization"
+    >
+      {compact ? (
+        <Modal
+          open={settingsOpen}
+          onOpenChange={onSettingsOpenChange}
+          title="Settings"
+          description="Edits apply to the preview as you make them."
+          closeLabel="Close Settings"
+          className="settings-drawer"
+          finalFocus={settingsButtonRef}
+        >
+          {settingsPanel}
+        </Modal>
+      ) : (
+        settingsPanel
+      )}
+      {/* The sample changes the previews, so compact layouts keep it beside them. */}
+      {compact && (
+        <div className="preview-sample">
+          <span className="preview-platform-label" aria-hidden="true">
+            Sample
+          </span>
+          {sampleSelect}
+        </div>
+      )}
       <div className="settings-preview-stage">
         <section
           className="settings-preview"

@@ -473,28 +473,158 @@
   padding: 0 4px;
 }
 
-@media (max-width: 800px) {
+/* Compact layouts, matching compactLayoutQuery in use-media-query.js: the
+   settings move into a drawer and the preview takes the full width. */
+@media (max-width: 800px), (pointer: coarse) and (max-height: 520px) {
   .settings-workspace,
   .settings-workspace--comparing {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: auto minmax(440px, 1fr);
+    grid-template-rows: auto;
     gap: var(--space-4);
     flex: none;
-  }
-  .settings-panel {
-    max-height: 520px;
-  }
-  .settings-preview-stage {
-    min-height: 440px;
+    min-height: 0;
+    padding-inline: max(var(--space-4), env(safe-area-inset-left))
+      max(var(--space-4), env(safe-area-inset-right));
+    padding-bottom: max(var(--space-4), env(safe-area-inset-bottom));
   }
   /* The stage grows with the theme controls and notes so the terminal keeps its height. */
   .settings-preview-stage > .settings-preview {
     position: relative;
     inset: auto;
-    min-height: 440px;
   }
   .settings-preview > .terminal {
-    flex: 0 0 400px;
+    flex: 0 0 clamp(280px, 56dvh, 400px);
+  }
+  /* Comparing swaps which preview is in the flow, so the page scrolls through
+     both panes instead of a box nested inside it. */
+  .settings-workspace--comparing .settings-preview-stage > .settings-preview {
+    position: absolute;
+    inset: 0;
+  }
+  .settings-workspace--comparing .comparison-preview {
+    position: relative;
+    inset: auto;
+  }
+  .comparison-preview > .comparison-view {
+    overflow: visible;
+  }
+  .preview-platform {
+    flex-wrap: wrap;
+  }
+  .preview-sample {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: calc(-1 * var(--space-2));
+  }
+  .preview-sample .select-trigger {
+    width: auto;
+    min-width: 180px;
+    min-height: 44px;
+  }
+
+  .settings-drawer.modal-popup {
+    left: auto;
+    right: 0;
+    top: 0;
+    transform: none;
+    width: min(440px, 100vw);
+    height: 100dvh;
+    border-width: 0 0 0 1px;
+    border-radius: var(--radius-panel) 0 0 var(--radius-panel);
+    padding-top: env(safe-area-inset-top);
+    padding-right: env(safe-area-inset-right);
+  }
+  .settings-drawer.modal-popup[data-starting-style],
+  .settings-drawer.modal-popup[data-ending-style] {
+    translate: 100% 0;
+    scale: 1;
+  }
+  .settings-drawer .modal-body {
+    padding: 0 var(--space-4) max(var(--space-6), env(safe-area-inset-bottom));
+    overscroll-behavior: contain;
+    scroll-padding-top: 72px;
+  }
+  /* One scroller for the whole drawer, with the category menu kept in view. */
+  .settings-drawer .settings-panel {
+    flex: none;
+    overflow: visible;
+  }
+  .settings-drawer .settings-toolbar {
+    display: contents;
+  }
+  .settings-drawer .settings-heading {
+    margin: var(--space-4) 0;
+  }
+  .settings-drawer .randomize-run:not(:has(.randomize-status:empty)) {
+    margin: calc(-1 * var(--space-2)) 0 var(--space-3);
+  }
+  .settings-drawer .settings-navigation {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    padding: var(--space-2) 0;
+    background: var(--card-background);
+    border-bottom: 1px solid var(--border);
+  }
+  .settings-drawer .settings-fields-scroll {
+    flex: none;
+    overflow: visible;
+    padding: var(--space-4) 0 0;
+  }
+  .settings-category {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    gap: var(--space-3);
+    min-width: 0;
+  }
+  .settings-category label {
+    color: var(--muted);
+  }
+  .settings-category .select-trigger {
+    flex: 1;
+    min-width: 0;
+  }
+  /* The drawer is narrow at every width, so fields stack as on a phone. */
+  .settings-drawer .setting-field,
+  .settings-drawer .setting-field--select {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: var(--space-2);
+  }
+  .settings-drawer .setting-control {
+    grid-column: 1;
+    grid-row: 3;
+    justify-self: start;
+  }
+  .settings-drawer .setting-field--font-name .setting-control {
+    width: 100%;
+  }
+  .settings-drawer .button,
+  .settings-drawer .select-trigger,
+  .settings-drawer .setting-field input,
+  .settings-drawer .palette-hex,
+  .settings-drawer .palette-swatch {
+    min-height: 44px;
+  }
+  .settings-drawer .icon-button {
+    min-width: 44px;
+  }
+  /* Room above a focused control for its label and validation message. */
+  .settings-drawer .setting-control > :is(input, .select-trigger) {
+    scroll-margin-top: 96px;
+  }
+}
+/* 16px keeps mobile Safari from zooming the page when a field takes focus. */
+@media (pointer: coarse) {
+  .settings-drawer input {
+    font-size: 16px;
+  }
+}
+@media (max-width: 480px) {
+  .settings-drawer.modal-popup {
+    border-width: 0;
+    border-radius: 0;
   }
 }
 @media (max-width: 440px) {

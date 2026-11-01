@@ -305,6 +305,55 @@
     grid-auto-rows: 480px;
   }
 }
+/* Compact layouts, matching compactLayoutQuery in use-media-query.js: smaller
+   cards leave room for the preview, and touch controls reach 44px. */
+@media (max-width: 800px), (pointer: coarse) and (max-height: 520px) {
+  .theme-strip {
+    height: 244px;
+  }
+  .theme-strip-viewport {
+    --theme-card-width: 224px;
+  }
+  .theme-strip-arrow.button {
+    width: 44px;
+    min-height: 44px;
+  }
+  .theme-card-save.button,
+  .theme-card-palette.button {
+    bottom: 2px;
+    min-width: 44px;
+    min-height: 44px;
+  }
+  .theme-card-save.button {
+    right: 2px;
+  }
+  .theme-card-palette.button {
+    right: 46px;
+  }
+  .theme-card--palette .theme-card-name {
+    padding-right: 84px;
+  }
+  .comparison-view {
+    height: clamp(320px, 72dvh, 580px);
+  }
+  .comparison-toolbar > .icon-button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  .comparison-footer .button {
+    min-height: 44px;
+  }
+  .filter-bar-field .select-trigger,
+  .filter-bar-summary .button {
+    min-height: 44px;
+  }
+}
+@media (max-width: 550px) {
+  .comparison-view {
+    height: auto;
+    grid-auto-rows: clamp(360px, 64dvh, 480px);
+  }
+}
 
 .filter-bar {
   display: flex;

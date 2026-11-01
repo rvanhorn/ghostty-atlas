@@ -242,7 +242,9 @@ test("responsive resizing preserves correct card sizes and navigation", async ({
   await page.setViewportSize({ width: 1440, height: 900 });
   await pick(page, 0).focus();
   await page.keyboard.press("End");
-  for (const width of [390, 850, 851, 1440]) {
+  // Issue #9: compact layouts (800px and narrower) use smaller cards so the
+  // preview stays near the strip.
+  for (const width of [390, 800, 801, 850, 851, 1440]) {
     await page.setViewportSize({ width, height: 900 });
     await expect
       .poll(() =>
@@ -251,7 +253,7 @@ test("responsive resizing preserves correct card sizes and navigation", async ({
           .last()
           .evaluate((element) => element.getBoundingClientRect().width),
       )
-      .toBe(width <= 850 ? 276 : 296);
+      .toBe(width <= 800 ? 224 : width <= 850 ? 276 : 296);
     await page.keyboard.press("Home");
     await expectVisibleCard(page, 0);
     if (width === 390 || width === 1440) {
