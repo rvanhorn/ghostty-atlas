@@ -14,8 +14,10 @@ export const SettingField = ({
   const numeric = field.type === "number" || field.type === "opacity";
   const inputId = `setting-${field.key}`;
   const descriptionId = `${inputId}-description`;
+  const suggestionsId = field.suggestions && `${inputId}-suggestions`;
   const inputProps = {
     id: inputId,
+    list: suggestionsId || undefined,
     disabled: Boolean(previewRequirement),
     value,
     "aria-invalid": Boolean(error),
@@ -92,6 +94,13 @@ export const SettingField = ({
             step={field.type === "opacity" ? 0.01 : field.step}
             inputMode={numeric ? "decimal" : undefined}
           />
+        )}
+        {suggestionsId && (
+          <datalist id={suggestionsId}>
+            {field.suggestions.map((font) => (
+              <option key={font} value={font} />
+            ))}
+          </datalist>
         )}
       </div>
     </div>

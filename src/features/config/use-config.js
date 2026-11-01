@@ -5,6 +5,8 @@ import {
   createConfigState,
 } from "./config-state.js";
 import { parseImport } from "./validation.js";
+import { randomizeConfig } from "./randomize.js";
+import { themes } from "../../data/themes.js";
 
 // A theme from a shared link starts the config without counting as a change.
 export const useConfig = (initialThemeName = null) => {
@@ -46,6 +48,13 @@ export const useConfig = (initialThemeName = null) => {
     updatePalette: (colors, coalesce) =>
       dispatch({ type: "palette", colors, coalesce }),
     undoPalette: () => dispatch({ type: "palette-undo" }),
+    randomize: (target) =>
+      dispatch({
+        type: "randomize",
+        ...randomizeConfig(state.document, { target, catalog: themes }),
+      }),
+    undoRandomize: () => dispatch({ type: "randomize-undo" }),
+    restoreBeforeRandomize: () => dispatch({ type: "randomize-restore" }),
     revert: () => dispatch({ type: "revert" }),
     restore: (storedSnapshot, filename) =>
       dispatch({ type: "restore", snapshot: storedSnapshot, filename }),

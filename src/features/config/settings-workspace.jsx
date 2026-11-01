@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { RotateCcw } from "lucide-react";
+import { History, RotateCcw, Shuffle, Undo2 } from "lucide-react";
 import { fieldForTarget, fields } from "./fields.js";
 import { settingCategories } from "./categories.js";
 import { getPreviewRequirement } from "./preview-support.js";
@@ -33,8 +33,13 @@ export const SettingsWorkspace = ({
   onSampleChange,
   compareEnabled,
   comparisonPreview,
+  onRandomize,
 }) => {
   const [category, setCategory] = useState("typography");
+  // The document Undo or Restore returned to before the run; any later edit replaces it.
+  const [restoredDocument, setRestoredDocument] = useState(null);
+  const randomCount = config.randomHistory.length;
+  const restored = config.document === restoredDocument;
   const activeCategory = settingCategories.find(({ id }) => id === category);
   const visibleFields = fields.filter((field) =>
     activeCategory.keys.includes(field.key),
@@ -58,12 +63,57 @@ export const SettingsWorkspace = ({
         <div className="settings-toolbar">
           <div className="settings-heading">
             <h1>Configuration</h1>
-            <SelectControl
-              label="Preview Sample"
-              value={sample}
-              options={previewSamples}
-              onValueChange={onSampleChange}
-            />
+            <div className="settings-heading-actions">
+              <Button
+                onClick={onRandomize}
+                title="Pick a random catalog theme and random values for nearly every setting"
+              >
+                <Shuffle size={16} />
+                Randomize
+              </Button>
+              <SelectControl
+                label="Preview Sample"
+                value={sample}
+                options={previewSamples}
+                onValueChange={onSampleChange}
+              />
+            </div>
+          </div>
+          <div className="randomize-run">
+            <p className="randomize-status" role="status">
+              {randomCount
+                ? `Randomized ${randomCount === 1 ? "once" : `${randomCount} times`}. Theme: ${themeValue}`
+                : restored
+                  ? "Restored your configuration from before randomizing."
+                  : ""}
+            </p>
+            {randomCount > 0 && (
+              <>
+                <Button
+                  variant="quiet"
+                  onClick={() => {
+                    if (randomCount === 1)
+                      setRestoredDocument(config.randomHistory[0].document);
+                    config.undoRandomize();
+                  }}
+                  title="Go back one randomization"
+                >
+                  <Undo2 size={16} />
+                  Undo Randomize
+                </Button>
+                <Button
+                  variant="quiet"
+                  onClick={() => {
+                    setRestoredDocument(config.randomHistory[0].document);
+                    config.restoreBeforeRandomize();
+                  }}
+                  title="Return to the configuration you had before you started randomizing"
+                >
+                  <History size={16} />
+                  Restore Previous Config
+                </Button>
+              </>
+            )}
           </div>
           <div className="settings-navigation">
             <SegmentedControl

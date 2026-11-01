@@ -22,6 +22,8 @@ export const createConfigState = (
   filename,
   // Color edits before each palette change, newest last, for undo.
   paletteHistory: [],
+  // States before each randomization in the current run, oldest first.
+  randomHistory: [],
 });
 
 /* A snapshot is the plain-data form of the config state that browser storage keeps. */
@@ -48,6 +50,15 @@ export const restoreConfigState = (snapshot, filename = snapshot.filename) => {
   return state;
 };
 
+// Font lists are one family per line in the editor and one directive per family.
+const fieldValues = (field, value) =>
+  field.type === "fonts"
+    ? value
+        .split("\n")
+        .map((font) => font.trim())
+        .filter(Boolean)
+    : value;
+
 const cloneDocument = (document) => {
   const nextDocument = new ConfigDocument(document.source);
   nextDocument.edits = new Map(document.edits);
@@ -63,7 +74,7 @@ const recordPaletteHistory = (state, nextDocument) => {
     : [...state.paletteHistory, before];
 };
 
-export const configReducer = (state, action) => {
+const applyConfigAction = (state, action) => {
   if (action.type === "import")
     return createConfigState(action.source, action.filename);
   if (action.type === "restore")
@@ -153,16 +164,7 @@ export const configReducer = (state, action) => {
   if (error) nextErrors[field.key] = error;
   else delete nextErrors[field.key];
   const nextDocument = cloneDocument(state.document);
-  if (!error)
-    nextDocument.set(
-      field.key,
-      field.type === "fonts"
-        ? value
-            .split("\n")
-            .map((font) => font.trim())
-            .filter(Boolean)
-        : value,
-    );
+  if (!error) nextDocument.set(field.key, fieldValues(field, value));
   return {
     ...state,
     document: nextDocument,
@@ -170,4 +172,44 @@ export const configReducer = (state, action) => {
     inputs: { ...state.inputs, [field.key]: value },
     errors: nextErrors,
   };
+};
+
+/* `values` maps setting keys to values from randomizeConfig, which only picks valid
+   values; the randomized settings drop any pending input or error. */
+const applyRandomization = (state, { theme, values }) => {
+  const nextDocument = cloneDocument(state.document);
+  const nextInputs = { ...state.inputs };
+  const nextErrors = { ...state.errors };
+  nextDocument.set("theme", theme);
+  Object.entries(values).forEach(([key, value]) => {
+    const field = fields.find((candidate) => candidate.key === key);
+    nextDocument.set(key, fieldValues(field, value));
+    delete nextInputs[key];
+    delete nextErrors[key];
+  });
+  return {
+    ...state,
+    document: nextDocument,
+    lastChangedKey: null,
+    inputs: nextInputs,
+    errors: nextErrors,
+    randomHistory: [...state.randomHistory, state],
+  };
+};
+
+/* A run of randomizations lasts until any other change. Undo steps back one
+   randomization; restore returns to the state before the run's first one. */
+export const configReducer = (state, action) => {
+  if (action.type === "randomize") return applyRandomization(state, action);
+  if (action.type === "randomize-undo" || action.type === "randomize-restore") {
+    const history = state.randomHistory;
+    if (!history.length) return state;
+    return action.type === "randomize-undo"
+      ? { ...history.at(-1), randomHistory: history.slice(0, -1) }
+      : { ...history[0], randomHistory: [] };
+  }
+  const nextState = applyConfigAction(state, action);
+  return nextState === state || !nextState.randomHistory.length
+    ? nextState
+    : { ...nextState, randomHistory: [] };
 };

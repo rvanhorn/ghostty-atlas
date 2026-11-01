@@ -15,6 +15,7 @@ Browse Ghostty themes, compare terminal palettes, and build a configuration with
 - Share a link to the current theme, or to a two-theme comparison, with the selected preview sample.
 - Configure separate light and dark themes, which Ghostty switches with the system appearance, and preview either one.
 - Adjust typography, palette, background, layout, cursor, behavior, window, macOS, and Linux settings, and preview macOS or Linux window chrome.
+- Randomize the theme and nearly every setting to explore new combinations, then undo a step or restore the config you started from.
 - Edit a theme's window and ANSI colors, then export them as a Ghostty theme file or import a theme file's colors.
 - Import an existing config without losing untouched comments, unknown directives, or line endings.
 - Copy or download the result, or download a macOS and Linux installation script that backs up the existing config before replacing it. The script replaces the config file Ghostty already reads, including one in `~/.config/ghostty` on macOS, and names a new file `config.ghostty`, or `config` for a Ghostty 1.2 or earlier target.
@@ -106,6 +107,14 @@ Import files are limited to 256 KB. Unknown settings are preserved, and invalid 
 **Light & Dark** mode writes Ghostty's `theme = light:Name,dark:Name` form. Atlas does not detect the system appearance for the preview; the Light and Dark toggle chooses which member to preview, and theme cards set that member. An imported pair in either order, with any surrounding whitespace, stays unchanged until edited. Missing, unlabeled, or uncataloged members are explained and the expression is kept as written. Switching to **Single Theme** keeps the previewed member; switching back restores an imported pair or starts a pair with the current theme on both sides.
 
 **Palette** edits are written to the config as Ghostty color settings (`background`, `foreground`, `cursor-color`, `cursor-text`, `selection-background`, `selection-foreground`, and `palette = N=#rrggbb`), which Ghostty applies over any theme, including both members of a light and dark pair. The preview applies the same settings from an imported config. Atlas reads hex colors only; X11 color names stay in the config and are listed, and the preview shows the theme color for them. Undo history lasts for the session. **Export Theme File** writes the 22 colors to a theme file named after the theme; save it without an extension in `~/.config/ghostty/themes/` (or `$XDG_CONFIG_HOME/ghostty/themes/`) and set `theme = <name>`, or reference it by absolute path. The catalog itself never changes; new shared palettes belong in iTerm2 Color Schemes.
+
+**Randomize**, beside the Preview Sample menu, picks a catalog theme other than the current one and a value for nearly every setting, so the theme strip, editor, preview, and export all show the same result. Choices come from each setting's options for **Your Target**, practical ranges on the setting's step (for example font sizes 11 to 20 and opacity 0.7 to 1), and the fonts the Font Family and Title & Tab Font fields suggest. A light and dark pair stays a pair, with a light theme for the light member and a dark theme for the dark one. Settings that would do nothing return to Ghostty's default: blur without transparency, macOS Window Appearance and Titlebar Folder Icon without a native titlebar, window buttons and title font with a hidden titlebar, Linux titlebar colors without Ghostty Colors, titlebar style without the GTK titlebar, and tab position and wide tabs with the tab bar set to Never. Randomize leaves these unchanged:
+
+- Palette colors. The random catalog theme is the palette randomization, and color settings are your own edits that Ghostty applies over any theme.
+- Settings and values the target does not support or has deprecated, such as Linux settings for a macOS target, values that need a later Ghostty version, and `scrollback-limit` for Ghostty 1.4, which renamed it.
+- Comments and directives Atlas does not edit.
+
+It never sets Confirm Before Closing to Never, which could close a running process without a warning, and gives Font Family one family rather than a fallback list. **Undo Randomize** steps back one randomization; **Restore Previous Config** returns to the config from before the first randomization, including imported values. Both last until any other edit, and the history is not stored. The randomized config is saved as a draft like any other edit.
 
 ## Sorting and Similar Themes
 

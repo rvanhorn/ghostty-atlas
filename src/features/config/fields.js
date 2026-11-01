@@ -12,6 +12,21 @@ export const fields = [
     group: "appearance",
     type: "fonts",
     placeholder: "JetBrains Mono",
+    // Offered as input suggestions and used by Randomize; any installed family works.
+    suggestions: [
+      "Geist Mono",
+      "JetBrains Mono",
+      "Fira Code",
+      "Cascadia Code",
+      "Iosevka",
+      "Hack",
+      "Source Code Pro",
+      "IBM Plex Mono",
+      "SF Mono",
+      "Menlo",
+      "Ubuntu Mono",
+      "DejaVu Sans Mono",
+    ],
     help: "Separate fallback families with commas. Fonts must be installed for Ghostty; browser availability may differ.",
   },
   {
@@ -199,6 +214,15 @@ export const fields = [
     group: "window",
     type: "text",
     placeholder: "System Default",
+    suggestions: [
+      "Geist",
+      "Inter",
+      "SF Pro",
+      "Helvetica Neue",
+      "Cantarell",
+      "Noto Sans",
+      "Ubuntu",
+    ],
     help: "One installed font family for window and tab titles. Browser availability may differ.",
   },
   {

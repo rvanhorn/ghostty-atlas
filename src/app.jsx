@@ -132,6 +132,11 @@ export const App = () => {
     },
     [setTheme, previewAppearance, compareEnabled, setComparisonVisible],
   );
+  // Like picking a theme, randomizing shows the result in the main preview.
+  const randomize = () => {
+    config.randomize(compatibilityTarget);
+    if (compareEnabled) setComparisonVisible(false);
+  };
   const clearFilters = () => {
     setSearchQuery("");
     setFilters(defaultFilters);
@@ -241,6 +246,7 @@ export const App = () => {
           sample={sample}
           onSampleChange={setSample}
           compareEnabled={compareEnabled}
+          onRandomize={randomize}
           comparisonPreview={
             <ComparisonView
               comparison={comparison}
