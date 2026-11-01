@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { RotateCcw } from "lucide-react";
-import { fields } from "./fields.js";
+import { fieldForTarget, fields } from "./fields.js";
 import { settingCategories } from "./categories.js";
+import { getPreviewRequirement } from "./preview-support.js";
 import { findTheme } from "../../data/themes.js";
 import { Button } from "../../components/ui/button.jsx";
 import { SegmentedControl } from "../../components/ui/segmented-control.jsx";
@@ -9,7 +10,7 @@ import { SelectControl } from "../../components/ui/select.jsx";
 import { TerminalPreview } from "../../components/terminal-preview.jsx";
 import { previewSamples } from "../../shared/preview-samples.js";
 import { SettingField } from "./setting-field.jsx";
-import { checkSetting } from "./compatibility.js";
+import { checkSetting, targetPlatforms } from "./compatibility.js";
 import { ThemeModeControls } from "./theme-mode-controls.jsx";
 import { PaletteEditor } from "../palette/palette-editor.jsx";
 import { applyColorOverrides, readColorOverrides } from "../palette/palette.js";
@@ -27,6 +28,7 @@ export const SettingsWorkspace = ({
   previewAppearance,
   onPreviewAppearanceChange,
   compatibilityTarget,
+  onCompatibilityTargetChange,
   sample,
   onSampleChange,
   compareEnabled,
@@ -37,7 +39,8 @@ export const SettingsWorkspace = ({
   const visibleFields = fields.filter((field) =>
     activeCategory.keys.includes(field.key),
   );
-  const titlebar = config.document.get("macos-titlebar-style") || "transparent";
+  // The preview draws the platform chosen as the compatibility target.
+  const { platform } = compatibilityTarget;
   const themeValue = config.document.get("theme");
   const pairNotes = describeThemePair(themeValue);
   const previewThemeName = getThemeName(themeValue, previewAppearance);
@@ -96,24 +99,12 @@ export const SettingsWorkspace = ({
               {visibleFields.map((field) => (
                 <SettingField
                   key={field.key}
-                  field={field}
-                  previewRequirement={
-                    ["window-theme", "macos-titlebar-proxy-icon"].includes(
-                      field.key,
-                    ) && titlebar !== "native"
-                      ? "Choose Native in Titlebar & Tabs to enable this option."
-                      : [
-                            "macos-window-buttons",
-                            "window-title-font-family",
-                          ].includes(field.key) && titlebar === "hidden"
-                        ? "Show the titlebar in Titlebar & Tabs to enable this option."
-                        : field.key === "background-blur" &&
-                            Number(
-                              config.document.get("background-opacity") || 1,
-                            ) === 1
-                          ? "Lower Background Opacity below 1 to enable blur."
-                          : undefined
-                  }
+                  field={fieldForTarget(field, compatibilityTarget)}
+                  previewRequirement={getPreviewRequirement(
+                    field.key,
+                    config.document,
+                    platform,
+                  )}
                   value={config.getValue(field.key)}
                   compatibility={checkSetting(
                     field.key,
@@ -135,6 +126,22 @@ export const SettingsWorkspace = ({
           inert={compareEnabled}
           aria-hidden={compareEnabled}
         >
+          <div className="preview-platform">
+            <span className="preview-platform-label" aria-hidden="true">
+              Platform
+            </span>
+            <SegmentedControl
+              label="Preview Platform"
+              value={platform}
+              options={targetPlatforms}
+              onValueChange={(nextPlatform) =>
+                onCompatibilityTargetChange({
+                  ...compatibilityTarget,
+                  platform: nextPlatform,
+                })
+              }
+            />
+          </div>
           <ThemeModeControls
             themeValue={themeValue}
             appearance={previewAppearance}
@@ -147,7 +154,14 @@ export const SettingsWorkspace = ({
             theme={previewTheme}
             sample={sample}
             document={config.document}
+            platform={platform}
           />
+          {platform === "linux" && (
+            <p className="preview-note">
+              The Linux preview approximates a GNOME window. Other desktops and
+              window managers can draw titlebars and tabs differently.
+            </p>
+          )}
           {parseThemeValue(themeValue).paired
             ? pairNotes.map((note) => (
                 <p className="preview-note" key={note}>

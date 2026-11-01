@@ -136,6 +136,26 @@ test("compatibility follows the chosen platform and version", () => {
   assert.match(opacity[0].text, /restarting Ghostty/);
   assert.deepEqual(levels("background-opacity", ["0.9"], "linux", "1.4"), []);
   assert.deepEqual(levels("future-key", ["x"], "macos", "1.4"), []);
+  // Issue #13: Linux settings, their first versions and deprecated values.
+  assert.deepEqual(levels("gtk-toolbar-style", ["flat"], "linux", "1.1"), [
+    "info",
+    "unsupported",
+    "info",
+  ]);
+  assert.deepEqual(levels("window-show-tab-bar", ["never"], "macos", "1.4"), [
+    "unsupported",
+  ]);
+  assert.deepEqual(levels("gtk-tabs-location", ["hidden"], "linux", "1.2"), [
+    "info",
+    "deprecated",
+  ]);
+  assert.deepEqual(levels("window-decoration", ["server"], "linux", "1.0"), [
+    "unsupported",
+    "info",
+  ]);
+  assert.deepEqual(levels("macos-window-shadow", ["false"], "linux", "1.4"), [
+    "unsupported",
+  ]);
 });
 
 test("every compatibility finding cites Ghostty documentation", () => {
@@ -152,6 +172,18 @@ test("every compatibility finding cites Ghostty documentation", () => {
     "macos-titlebar-proxy-icon": ["hidden"],
     "window-theme": ["ghostty"],
     "window-title-font-family": ["Inter"],
+    "window-decoration": ["server"],
+    "macos-window-shadow": ["false"],
+    "gtk-titlebar": ["false"],
+    "gtk-titlebar-style": ["tabs"],
+    "gtk-titlebar-hide-when-maximized": ["true"],
+    "gtk-tabs-location": ["hidden"],
+    "gtk-wide-tabs": ["false"],
+    "gtk-toolbar-style": ["flat"],
+    "window-show-tab-bar": ["never"],
+    "window-subtitle": ["working-directory"],
+    "window-titlebar-background": ["#000000"],
+    "window-titlebar-foreground": ["#ffffff"],
   };
   const findings = targets.flatMap((target) =>
     Object.entries(samples).flatMap(([key, values]) =>

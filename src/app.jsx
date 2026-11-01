@@ -88,6 +88,7 @@ export const App = () => {
   // Which member of a light and dark pair the preview, theme strip, and share link use.
   const [previewAppearance, setPreviewAppearance] = useState("dark");
   // The platform and Ghostty version the user plans to export for, for this session.
+  // The preview draws the same platform.
   const [compatibilityTarget, setCompatibilityTarget] = useState(defaultTarget);
   const setTheme = config.setTheme;
   const themeValue = config.document.get("theme");
@@ -236,6 +237,7 @@ export const App = () => {
           previewAppearance={previewAppearance}
           onPreviewAppearanceChange={setPreviewAppearance}
           compatibilityTarget={compatibilityTarget}
+          onCompatibilityTargetChange={setCompatibilityTarget}
           sample={sample}
           onSampleChange={setSample}
           compareEnabled={compareEnabled}
@@ -245,6 +247,7 @@ export const App = () => {
               filteredThemes={filteredThemes}
               sample={sample}
               document={config.document}
+              platform={compatibilityTarget.platform}
               onChange={(side, themeName) =>
                 dispatchComparison({ type: "select", side, themeName })
               }

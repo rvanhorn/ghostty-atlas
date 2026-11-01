@@ -4,6 +4,8 @@
 const reference = "https://ghostty.org/docs/config/reference";
 const releaseNotes = "https://ghostty.org/docs/install/release-notes";
 const optionDocs = (key) => `${reference}#${key}`;
+const notes11 = `${releaseNotes}/1-1-0`;
+const notes12 = `${releaseNotes}/1-2-0`;
 const notes14 = `${releaseNotes}/1-4-0`;
 
 export const targetPlatforms = [
@@ -28,11 +30,17 @@ const applyMessages = {
     "Open windows update after their working directory changes.",
 };
 
+const ghosttyThemeOnly = {
+  platforms: ["linux"],
+  text: "Takes effect only with window-theme = ghostty.",
+};
+
 /* Each entry may have:
    - platforms: the platforms that use the setting (every platform when omitted).
    - since: the first release series with the setting, or one per platform.
    - applies: an applyMessages id, or one per platform, for when changes take effect.
-   - notes: [{ platforms, since, level, text, source }] for other documented caveats.
+   - notes: [{ platforms, since, before, level, text, source }] for other documented
+     caveats, shown from `since` and up to `before` when given.
    - values: [{ values, platforms, since, deprecatedIn, changedIn, text, source }] for
      individual values; `source` defaults to the setting's own documentation. */
 export const settingCompatibility = {
@@ -100,9 +108,89 @@ export const settingCompatibility = {
     source: optionDocs("window-theme"),
     values: [{ values: ["ghostty"], platforms: ["linux"] }],
   },
+  "window-decoration": {
+    source: optionDocs("window-decoration"),
+    values: [
+      { values: ["auto"], since: "1.1", source: notes11 },
+      { values: ["client", "server"], since: "1.1" },
+    ],
+    notes: [
+      {
+        platforms: ["linux"],
+        text: "Server-side decorations need X11, or a Wayland compositor that supports them, such as KDE Plasma; otherwise Ghostty draws its own.",
+      },
+    ],
+  },
   "window-title-font-family": {
     source: optionDocs("window-title-font-family"),
     since: { macos: "1.0", linux: "1.1" },
+  },
+  "macos-window-shadow": {
+    source: optionDocs("macos-window-shadow"),
+    platforms: ["macos"],
+  },
+  "gtk-titlebar": {
+    source: optionDocs("gtk-titlebar"),
+    platforms: ["linux"],
+  },
+  "gtk-titlebar-style": {
+    source: optionDocs("gtk-titlebar-style"),
+    platforms: ["linux"],
+    values: [{ values: ["tabs"], since: "1.2", source: notes12 }],
+  },
+  "gtk-titlebar-hide-when-maximized": {
+    source: optionDocs("gtk-titlebar-hide-when-maximized"),
+    platforms: ["linux"],
+    since: "1.1",
+  },
+  "gtk-tabs-location": {
+    source: optionDocs("gtk-tabs-location"),
+    platforms: ["linux"],
+    values: [
+      {
+        values: ["hidden"],
+        deprecatedIn: "1.2",
+        text: "Deprecated in Ghostty 1.2: use window-show-tab-bar = never instead.",
+        source: notes12,
+      },
+    ],
+  },
+  "gtk-wide-tabs": {
+    source: optionDocs("gtk-wide-tabs"),
+    platforms: ["linux"],
+  },
+  "gtk-toolbar-style": {
+    source: optionDocs("gtk-toolbar-style"),
+    platforms: ["linux"],
+    since: "1.2",
+    notes: [
+      {
+        platforms: ["linux"],
+        before: "1.2",
+        text: "Earlier versions call this setting adw-toolbar-style.",
+        source: notes12,
+      },
+    ],
+  },
+  "window-show-tab-bar": {
+    source: optionDocs("window-show-tab-bar"),
+    platforms: ["linux"],
+    since: "1.2",
+  },
+  "window-subtitle": {
+    source: optionDocs("window-subtitle"),
+    platforms: ["linux"],
+    since: "1.1",
+  },
+  "window-titlebar-background": {
+    source: optionDocs("window-titlebar-background"),
+    platforms: ["linux"],
+    notes: [ghosttyThemeOnly],
+  },
+  "window-titlebar-foreground": {
+    source: optionDocs("window-titlebar-foreground"),
+    platforms: ["linux"],
+    notes: [ghosttyThemeOnly],
   },
   "macos-window-buttons": {
     source: optionDocs("macos-window-buttons"),
@@ -125,7 +213,7 @@ const seriesNumber = (version) => {
   const [major, minor] = version.split(".").map(Number);
   return major * 1000 + minor;
 };
-const isAtLeast = (version, since) =>
+export const isAtLeast = (version, since) =>
   seriesNumber(version) >= seriesNumber(since);
 const forPlatform = (value, platform) =>
   typeof value === "object" && value !== null ? value[platform] : value;
@@ -184,6 +272,7 @@ export const checkSetting = (key, values, target) => {
   (entry.notes ?? []).forEach((note) => {
     if (note.platforms && !note.platforms.includes(platform)) return;
     if (note.since && !isAtLeast(version, note.since)) return;
+    if (note.before && isAtLeast(version, note.before)) return;
     add(note.level ?? "info", note.text, note.source);
   });
   const applies = forPlatform(entry.applies, platform);

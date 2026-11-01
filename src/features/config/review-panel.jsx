@@ -75,8 +75,8 @@ export const ReviewPanel = ({ config, target, onTargetChange }) => {
           />
         </div>
         <p className="transfer-description">
-          Choose where you plan to use this config. Atlas does not detect your
-          Ghostty installation.
+          Choose where you plan to use this config; the preview shows the same
+          platform. Atlas does not detect your Ghostty installation.
         </p>
       </div>
       <section className="review-section" aria-labelledby="review-changes">

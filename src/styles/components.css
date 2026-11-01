@@ -703,6 +703,100 @@
   background: #181818;
   color: #d2d2d2;
 }
+/* Linux preview: a GNOME (libadwaita) header bar with a close button on the right,
+   never the macOS window buttons. */
+.terminal[data-platform="linux"] .terminal-window-header {
+  background: #303030;
+  color: #ffffff;
+}
+.terminal[data-platform="linux"][data-window-appearance="light"]
+  .terminal-window-header {
+  background: #ebebeb;
+  color: #2e2e2e;
+}
+.terminal[data-platform="linux"][data-window-appearance="ghostty"]
+  .terminal-window-header {
+  background: var(--titlebar-bg);
+  color: var(--titlebar-fg);
+}
+.terminal[data-platform="linux"] .terminal-chrome {
+  min-height: 46px;
+  padding: 6px 80px;
+  border-bottom: 0;
+}
+.terminal[data-platform="linux"] .terminal-chrome--plain {
+  min-height: 40px;
+  padding: 4px 80px 4px 12px;
+  justify-content: flex-start;
+  background: #0000001f;
+}
+.gtk-title {
+  display: grid;
+  justify-items: center;
+  min-width: 0;
+  line-height: 1.3;
+  font-weight: 600;
+}
+.gtk-title > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.gtk-subtitle {
+  font-weight: 400;
+  opacity: 0.7;
+}
+/* Left of the preview's help button, which sits in the top-right corner. */
+.gtk-window-controls {
+  position: absolute;
+  right: 44px;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #8883;
+}
+.terminal[data-platform="linux"] .preview-tabbar {
+  gap: 4px;
+  padding: 4px 6px;
+  border-bottom: 0;
+  background: transparent;
+}
+.terminal[data-platform="linux"] .terminal-chrome .preview-tabbar {
+  flex: 1;
+  padding: 0;
+}
+/* Tabs in the titlebar span it, leaving room for the close and help buttons. */
+.terminal[data-platform="linux"] .terminal-chrome:has(.preview-tabbar) {
+  padding-inline: 8px 80px;
+}
+.terminal[data-platform="linux"] .preview-tabbar button {
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  box-shadow: none;
+}
+.terminal[data-platform="linux"] .preview-tabbar button[aria-selected="true"] {
+  background: #8883;
+}
+.terminal[data-platform="linux"][data-wide-tabs="false"]
+  .preview-tabbar
+  button {
+  flex: 0 1 auto;
+}
+.terminal[data-toolbar-style="raised"] .terminal-window-header {
+  box-shadow: 0 1px 4px #0006;
+}
+.terminal[data-toolbar-style="raised"] .terminal-window-footer {
+  box-shadow: 0 -1px 4px #0006;
+}
+.terminal[data-toolbar-style="raised-border"] .terminal-window-header {
+  border-bottom: 1px solid #8886;
+}
+.terminal[data-toolbar-style="raised-border"] .terminal-window-footer {
+  border-top: 1px solid #8886;
+  border-bottom: 0;
+}
 .terminal-scroll {
   min-height: 0;
   overflow: auto;

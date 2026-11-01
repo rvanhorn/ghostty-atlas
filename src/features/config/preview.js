@@ -1,3 +1,6 @@
+import { normalizeColor } from "../palette/palette.js";
+import { resolveWindowAppearance } from "./contrast.js";
+
 const clampNumber = (value, fallback, minimum, maximum) => {
   const parsedValue = value === "" ? fallback : Number(value);
   return Number.isFinite(parsedValue)
@@ -47,6 +50,52 @@ export const getConfigurationPreview = (document) => {
       ? JSON.stringify(document.get("window-title-font-family"))
       : '"Geist", sans-serif',
     hideProxy: document.get("macos-titlebar-proxy-icon") === "hidden",
-    hideDecoration: document.get("window-decoration") === "none",
+    // Ghostty still reads false as none.
+    hideDecoration: ["none", "false"].includes(
+      document.get("window-decoration"),
+    ),
+    // Linux (GTK) window chrome. The preview always has two tabs.
+    gtkTitlebar: document.get("gtk-titlebar") !== "false",
+    gtkTitlebarStyle: document.get("gtk-titlebar-style") || "native",
+    // gtk-tabs-location = hidden is the deprecated form of window-show-tab-bar = never.
+    tabBar:
+      document.get("gtk-tabs-location") === "hidden"
+        ? "never"
+        : document.get("window-show-tab-bar") || "auto",
+    tabsLocation: document.get("gtk-tabs-location") || "top",
+    wideTabs: document.get("gtk-wide-tabs") !== "false",
+    toolbarStyle: document.get("gtk-toolbar-style") || "raised",
+    subtitle: document.get("window-subtitle") === "working-directory",
+    // X11 color names stay in the config; the preview shows hex colors only.
+    titlebarBackground: normalizeColor(
+      document.get("window-titlebar-background") || "",
+    ),
+    titlebarForeground: normalizeColor(
+      document.get("window-titlebar-foreground") || "",
+    ),
   };
+};
+
+/* The window appearance the preview draws for a platform: "light", "dark", or, on
+   Linux, "ghostty" for titlebars in the terminal's own colors. On macOS, transparent
+   and integrated titlebars follow the terminal background; Linux ignores those
+   macOS settings. */
+export const getWindowAppearance = (
+  preview,
+  platform,
+  background,
+  systemDark,
+) => {
+  const linux = platform === "linux";
+  const appearance = preview.windowAppearance || "auto";
+  if (appearance === "ghostty")
+    return linux
+      ? "ghostty"
+      : resolveWindowAppearance("auto", background, "native", systemDark);
+  return resolveWindowAppearance(
+    appearance,
+    background,
+    linux ? "native" : preview.titlebar,
+    systemDark,
+  );
 };

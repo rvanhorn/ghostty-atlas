@@ -67,7 +67,7 @@ export const TransferDialog = ({
       new Blob(
         [
           isScript
-            ? createConfigScript(config.exportedConfig)
+            ? createConfigScript(config.exportedConfig, target.version)
             : config.exportedConfig,
         ],
         { type: "text/plain;charset=utf-8" },
@@ -188,7 +188,9 @@ export const TransferDialog = ({
               </label>
               {exportMode === "command" && (
                 <p className="transfer-description">
-                  Backs up your existing config before replacing it.
+                  For macOS and Linux. Backs up your existing config before
+                  replacing it, and names a new file for Ghostty{" "}
+                  {target.version}.
                 </p>
               )}
               <textarea
@@ -202,7 +204,7 @@ export const TransferDialog = ({
                 readOnly
                 value={
                   exportMode === "command"
-                    ? createConfigScript(config.exportedConfig)
+                    ? createConfigScript(config.exportedConfig, target.version)
                     : config.exportedConfig
                 }
                 spellCheck={false}

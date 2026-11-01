@@ -18,6 +18,7 @@ const ComparisonPane = ({
   filteredThemes,
   sample,
   document,
+  platform,
   onChange,
   onLock,
   onCustomize,
@@ -80,6 +81,7 @@ const ComparisonPane = ({
         theme={theme}
         sample={sample}
         document={document}
+        platform={platform}
         scrollRef={scrollRef}
         label={`${label} Scrollable Preview`}
       />

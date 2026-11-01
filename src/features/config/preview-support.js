@@ -53,11 +53,20 @@ export const previewSupport = {
     mode: "native",
     note: "Applies in Ghostty when closing a terminal; this preview runs no processes.",
   },
-  "macos-titlebar-style": { mode: "visual", approximate: true },
+  "macos-titlebar-style": {
+    mode: "visual",
+    approximate: true,
+    note: "Shown in the macOS preview.",
+  },
   "window-theme": {
     mode: "visual",
     approximate: true,
-    note: "Native titlebars follow this choice. Transparent and integrated titlebars follow the terminal theme.",
+    note: "In the macOS preview, native titlebars follow this choice and transparent and integrated titlebars follow the terminal theme. The Linux preview approximates a GNOME titlebar.",
+  },
+  "window-decoration": {
+    mode: "visual",
+    approximate: true,
+    note: "The preview hides the titlebar for None. Client-side and server-side decorations look the same here; your desktop draws server-side ones.",
   },
   "window-title-font-family": {
     mode: "visual",
@@ -66,11 +75,15 @@ export const previewSupport = {
   },
   "macos-window-buttons": {
     mode: "visual",
-    note: "Visible only when the titlebar is shown.",
+    note: "Shown in the macOS preview when the titlebar is shown.",
   },
   "macos-titlebar-proxy-icon": {
     mode: "visual",
-    note: "Visible only with a native titlebar.",
+    note: "Shown in the macOS preview with a native titlebar.",
+  },
+  "macos-window-shadow": {
+    mode: "native",
+    note: "Applies in Ghostty. The preview does not draw the macOS window shadow.",
   },
   "macos-option-as-alt": {
     mode: "native",
@@ -80,4 +93,83 @@ export const previewSupport = {
     mode: "native",
     note: "Applies in Ghostty when its last window closes.",
   },
+  "gtk-titlebar": {
+    mode: "visual",
+    approximate: true,
+    note: "Shown in the Linux preview. Off shows a plain window manager titlebar; yours may differ.",
+  },
+  "gtk-titlebar-style": {
+    mode: "visual",
+    approximate: true,
+    note: "Shown in the Linux preview.",
+  },
+  "gtk-titlebar-hide-when-maximized": {
+    mode: "native",
+    note: "Applies in Ghostty when a window is maximized; the preview window is not maximized.",
+  },
+  "window-show-tab-bar": {
+    mode: "visual",
+    note: "Shown in the Linux preview, which has two tabs.",
+  },
+  "gtk-tabs-location": {
+    mode: "visual",
+    note: "Shown in the Linux preview.",
+  },
+  "gtk-wide-tabs": {
+    mode: "visual",
+    approximate: true,
+    note: "Shown in the Linux preview.",
+  },
+  "gtk-toolbar-style": {
+    mode: "visual",
+    approximate: true,
+    note: "Shown in the Linux preview.",
+  },
+  "window-subtitle": {
+    mode: "visual",
+    approximate: true,
+    note: "Shown in the Linux preview with a sample directory.",
+  },
+  "window-titlebar-background": {
+    mode: "visual",
+    approximate: true,
+    note: "Shown in the Linux preview. The preview reads hex colors only.",
+  },
+  "window-titlebar-foreground": {
+    mode: "visual",
+    approximate: true,
+    note: "Shown in the Linux preview. The preview reads hex colors only.",
+  },
+};
+
+/* Why the preview cannot show a setting with the current values, which disables its
+   control, or undefined. macOS titlebar rules apply only to the macOS preview, so
+   shared settings stay usable for Linux. */
+export const getPreviewRequirement = (key, document, platform) => {
+  const titlebar = document.get("macos-titlebar-style") || "transparent";
+  if (platform === "macos") {
+    if (
+      ["window-theme", "macos-titlebar-proxy-icon"].includes(key) &&
+      titlebar !== "native"
+    )
+      return "Choose Native in Titlebar & Tabs to enable this option.";
+    if (
+      ["macos-window-buttons", "window-title-font-family"].includes(key) &&
+      titlebar === "hidden"
+    )
+      return "Show the titlebar in Titlebar & Tabs to enable this option.";
+  }
+  if (
+    ["window-titlebar-background", "window-titlebar-foreground"].includes(
+      key,
+    ) &&
+    document.get("window-theme") !== "ghostty"
+  )
+    return "Set Window Appearance to Ghostty Colors to enable this option.";
+  if (
+    key === "background-blur" &&
+    Number(document.get("background-opacity") || 1) === 1
+  )
+    return "Lower Background Opacity below 1 to enable blur.";
+  return undefined;
 };

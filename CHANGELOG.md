@@ -21,14 +21,21 @@ All notable changes to Ghostty Atlas are documented here, grouped by release.
 - **Review Changes** in the Export tab lists each added, removed, or modified setting with its removed and added lines, compared with the imported or starter config. Comments, unknown directives, untouched settings, and line endings are not listed, and an unchanged config is reported as having no changes.
 - A target platform (macOS or Linux) and Ghostty version (1.0 to 1.4), chosen by the user for the session, drive compatibility notes in the review and beside each setting: settings or values the target does not support, deprecated values, and when changes take effect, each linked to Ghostty's documentation. Atlas does not detect the installation and never changes or removes settings because of these notes.
 
+- A **Linux** settings category with GTK titlebar, titlebar style, hide-when-maximized, tab bar visibility and position, wide tabs, bar style, window subtitle, and titlebar colors; **Window Decorations** under a new shared **Window** category; **Window Shadow** under macOS (Config Only); and a Linux-only **Ghostty Colors** choice for Window Appearance. Each new setting's platform, first Ghostty version, and deprecated values are checked for the chosen target and linked to Ghostty's documentation.
+- **Platform** above the configuration preview switches between macOS and Linux window chrome. It is the same target as **Your Target** in Review Changes. The Linux preview approximates a GNOME window with a close button instead of macOS window buttons, and shows tab position, wide tabs, bar style, subtitle, and Ghostty titlebar colors.
+
 ### Changed
 
+- Window Appearance and Title & Tab Font moved from macOS to the shared **Window** category, and Quit After Last Window to **Behavior**. macOS titlebar rules no longer disable them in the Linux preview.
+- The installation script, still for macOS and Linux only, replaces an existing config in `~/.config/ghostty` on macOS instead of adding an overriding file, and names a new file `config` for Ghostty 1.2 and earlier targets, which do not read `config.ghostty`.
 - **Preview Sample** is a menu instead of a row of buttons so all seven samples fit at narrow widths.
 - Platform, version, and restart notes for settings now come from the compatibility notes for the chosen target instead of fixed help text.
 - The configuration preview applies the config's own `background`, `foreground`, `cursor-color`, `cursor-text`, `selection-background`, `selection-foreground`, and `palette` settings over the theme, as Ghostty does. Imported configs with these settings now preview the colors Ghostty shows; color names Atlas cannot read are listed and keep the theme color.
 
 ### Fixed
 
+- **Copy Selected Text** offers Ghostty 1.4's Off, Selection Clipboard, System Clipboard, and Both Clipboards for a 1.4 target, and the earlier values for older targets, so the default target no longer shows a Deprecated note. Imported values stay as written.
+- The preview hides the titlebar for `window-decoration = false`, which Ghostty reads as `none`.
 - Fast horizontal scrolling no longer bounces back at the edge of the rendered theme cards. The catalog strip no longer uses native scroll snapping, and the arrow buttons align a card to the start edge themselves.
 
 ## 1.1.0 - 2026-10-04

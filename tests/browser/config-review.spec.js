@@ -90,3 +90,61 @@ test("review lists edits only, follows the chosen target, and keeps the export i
     page.locator("#setting-macos-window-buttons-description"),
   ).toContainText("Requires Ghostty 1.2 or later on macOS.");
 });
+
+/* Issue #13: one explicit platform drives the preview and the review; the Linux
+   preview never shows macOS window buttons, shared controls ignore macOS titlebar
+   rules on Linux, and switching platforms or categories keeps every directive. */
+test("the preview platform is the review target and Linux uses its own chrome", async ({
+  page,
+}) => {
+  const imported =
+    "# keep\nmacos-titlebar-style = hidden\ngtk-custom-css = extra.css\nfuture-key = 1\n";
+  await page.goto("/tests/browser/app.fixture.html");
+  await page.getByRole("button", { name: "Import / Export" }).click();
+  await page.getByRole("tab", { name: "Import", exact: true }).click();
+  await page.getByLabel("Config to Import").fill(imported);
+  await page.getByRole("button", { name: "Import Config" }).click();
+
+  const preview = page.getByRole("region", {
+    name: "Configuration Terminal",
+    exact: true,
+  });
+  const categories = page.getByRole("tablist", {
+    name: "Configuration Category",
+  });
+  await categories.getByRole("tab", { name: "Window", exact: true }).click();
+  const appearance = page.getByRole("combobox", { name: "Window Appearance" });
+  await expect(appearance).toBeDisabled();
+
+  await page
+    .getByRole("tablist", { name: "Preview Platform" })
+    .getByRole("tab", { name: "Linux" })
+    .click();
+  await expect(preview.locator(".window-lights")).toHaveCount(0);
+  await expect(preview.locator(".gtk-window-controls")).toHaveCount(1);
+  await expect(preview).toContainText("The Linux preview approximates");
+  await expect(appearance).toBeEnabled();
+  await appearance.click();
+  await page.getByRole("option", { name: "Ghostty Colors (Linux)" }).click();
+
+  await categories.getByRole("tab", { name: "Linux", exact: true }).click();
+  await page.getByRole("combobox", { name: "Tab Bar Position" }).click();
+  await page.getByRole("option", { name: "Bottom" }).click();
+  await expect(
+    preview.locator(".terminal-window-footer [role='tab']"),
+  ).toHaveCount(2);
+
+  await page.getByRole("button", { name: "Import / Export" }).click();
+  await page.getByRole("tab", { name: "Export", exact: true }).click();
+  await page.getByRole("tab", { name: "Review Changes" }).click();
+  const dialog = page.getByRole("dialog");
+  await expect(
+    dialog
+      .getByRole("tablist", { name: "Target Platform" })
+      .getByRole("tab", { name: "Linux" }),
+  ).toHaveAttribute("aria-selected", "true");
+  await page.getByRole("tab", { name: "Raw" }).click();
+  await expect(dialog.getByLabel("Config to Export")).toHaveValue(
+    `${imported}window-theme = ghostty\ngtk-tabs-location = bottom\n`,
+  );
+});

@@ -1,8 +1,14 @@
 import { test } from "vitest";
 import assert from "node:assert/strict";
 import { fields } from "../src/features/config/fields.js";
-import { previewSupport } from "../src/features/config/preview-support.js";
-import { getConfigurationPreview } from "../src/features/config/preview.js";
+import {
+  getPreviewRequirement,
+  previewSupport,
+} from "../src/features/config/preview-support.js";
+import {
+  getConfigurationPreview,
+  getWindowAppearance,
+} from "../src/features/config/preview.js";
 import {
   configReducer,
   createConfigState,
@@ -35,6 +41,16 @@ const examples = {
   "window-title-font-family": ["Arial", "titleFont", '"Arial"'],
   "macos-window-buttons": ["hidden", "hideButtons", true],
   "macos-titlebar-proxy-icon": ["hidden", "hideProxy", true],
+  "window-decoration": ["none", "hideDecoration", true],
+  "gtk-titlebar": ["false", "gtkTitlebar", false],
+  "gtk-titlebar-style": ["tabs", "gtkTitlebarStyle", "tabs"],
+  "window-show-tab-bar": ["never", "tabBar", "never"],
+  "gtk-tabs-location": ["bottom", "tabsLocation", "bottom"],
+  "gtk-wide-tabs": ["false", "wideTabs", false],
+  "gtk-toolbar-style": ["flat", "toolbarStyle", "flat"],
+  "window-subtitle": ["working-directory", "subtitle", true],
+  "window-titlebar-background": ["1E1E2E", "titlebarBackground", "#1e1e2e"],
+  "window-titlebar-foreground": ["#cdd6f4", "titlebarForeground", "#cdd6f4"],
 };
 
 test("every exposed setting has an explicit preview contract", () => {
@@ -117,6 +133,52 @@ test("window appearance follows system and titlebar precedence", () => {
   assert.equal(
     resolveWindowAppearance("dark", "#ffffff", "tabs", true),
     "light",
+  );
+});
+
+/* Issue #13: the preview target is explicit, and Linux does not use macOS titlebar
+   dependencies. window-theme = ghostty is Linux only; on Linux, macos-titlebar-style
+   does not decide the window appearance or disable shared controls. */
+test("the Linux preview ignores macOS titlebar rules and alone draws Ghostty colors", () => {
+  const document = createConfigState(
+    "macos-titlebar-style = transparent\nwindow-theme = light\n",
+  ).document;
+  const preview = getConfigurationPreview(document);
+  assert.equal(
+    getWindowAppearance(preview, "linux", "#000000", false),
+    "light",
+  );
+  assert.equal(getWindowAppearance(preview, "macos", "#000000", false), "dark");
+  const ghostty = getConfigurationPreview(
+    createConfigState("window-theme = ghostty\n").document,
+  );
+  assert.equal(
+    getWindowAppearance(ghostty, "linux", "#000000", false),
+    "ghostty",
+  );
+  assert.notEqual(
+    getWindowAppearance(ghostty, "macos", "#000000", false),
+    "ghostty",
+  );
+
+  const hidden = createConfigState(
+    "macos-titlebar-style = hidden\nwindow-theme = dark\n",
+  ).document;
+  for (const key of ["window-theme", "window-title-font-family"]) {
+    assert.ok(getPreviewRequirement(key, hidden, "macos"));
+    assert.equal(getPreviewRequirement(key, hidden, "linux"), undefined);
+  }
+  // Titlebar colors depend on window-theme = ghostty on every platform.
+  assert.ok(
+    getPreviewRequirement("window-titlebar-background", hidden, "linux"),
+  );
+  assert.equal(
+    getPreviewRequirement(
+      "window-titlebar-background",
+      createConfigState("window-theme = ghostty\n").document,
+      "linux",
+    ),
+    undefined,
   );
 });
 
