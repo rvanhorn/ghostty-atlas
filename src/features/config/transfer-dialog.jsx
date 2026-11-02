@@ -3,6 +3,8 @@ import { Copy, Download, Upload } from "lucide-react";
 import { Modal } from "../../components/ui/modal.jsx";
 import { Button } from "../../components/ui/button.jsx";
 import { SegmentedControl } from "../../components/ui/segmented-control.jsx";
+import { PresetsPanel } from "./presets-panel.jsx";
+import { ReviewPanel } from "./review-panel.jsx";
 import {
   createConfigScript,
   SCRIPT_COMMAND,
@@ -14,7 +16,10 @@ export const TransferDialog = ({
   onOpenChange,
   onOpenChangeComplete,
   config,
+  configStorage,
   onImported,
+  target,
+  onTargetChange,
 }) => {
   const [mode, setMode] = useState("export");
   const [exportMode, setExportMode] = useState("raw");
@@ -62,7 +67,7 @@ export const TransferDialog = ({
       new Blob(
         [
           isScript
-            ? createConfigScript(config.exportedConfig)
+            ? createConfigScript(config.exportedConfig, target.version)
             : config.exportedConfig,
         ],
         { type: "text/plain;charset=utf-8" },
@@ -94,6 +99,7 @@ export const TransferDialog = ({
           options={[
             ["import", "Import"],
             ["export", "Export"],
+            ["presets", "Presets"],
           ]}
           onValueChange={(value) => {
             setMode(value);
@@ -102,9 +108,10 @@ export const TransferDialog = ({
         />
         {mode === "export" && (
           <SegmentedControl
-            label="Export Format"
+            label="Export View"
             value={exportMode}
             options={[
+              ["review", "Review Changes"],
               ["raw", "Raw"],
               ["command", "Command"],
             ]}
@@ -115,7 +122,16 @@ export const TransferDialog = ({
           />
         )}
       </div>
-      {mode === "import" ? (
+      {mode === "presets" ? (
+        <PresetsPanel
+          configStorage={configStorage}
+          filename={config.filename}
+          onLoaded={() => {
+            onImported();
+            onOpenChange(false);
+          }}
+        />
+      ) : mode === "import" ? (
         <div className="transfer-content">
           <div className="transfer-intro">
             <span>Paste your config or choose a file.</span>
@@ -157,30 +173,44 @@ export const TransferDialog = ({
         </div>
       ) : (
         <div className="transfer-content">
-          <label className="transfer-label" htmlFor="export-source">
-            {exportMode === "command" ? "Install Script" : "Raw Configuration"}
-          </label>
-          {exportMode === "command" && (
-            <p className="transfer-description">
-              Backs up your existing config before replacing it.
-            </p>
+          {exportMode === "review" ? (
+            <ReviewPanel
+              config={config}
+              target={target}
+              onTargetChange={onTargetChange}
+            />
+          ) : (
+            <>
+              <label className="transfer-label" htmlFor="export-source">
+                {exportMode === "command"
+                  ? "Install Script"
+                  : "Raw Configuration"}
+              </label>
+              {exportMode === "command" && (
+                <p className="transfer-description">
+                  For macOS and Linux. Backs up your existing config before
+                  replacing it, and names a new file for Ghostty{" "}
+                  {target.version}.
+                </p>
+              )}
+              <textarea
+                id="export-source"
+                className="config-source"
+                aria-label={
+                  exportMode === "command"
+                    ? "Install Script Preview"
+                    : "Config to Export"
+                }
+                readOnly
+                value={
+                  exportMode === "command"
+                    ? createConfigScript(config.exportedConfig, target.version)
+                    : config.exportedConfig
+                }
+                spellCheck={false}
+              />
+            </>
           )}
-          <textarea
-            id="export-source"
-            className="config-source"
-            aria-label={
-              exportMode === "command"
-                ? "Install Script Preview"
-                : "Config to Export"
-            }
-            readOnly
-            value={
-              exportMode === "command"
-                ? createConfigScript(config.exportedConfig)
-                : config.exportedConfig
-            }
-            spellCheck={false}
-          />
           {exportMode === "command" && (
             <div className="transfer-command">
               <label className="transfer-label" htmlFor="script-command">
@@ -207,7 +237,7 @@ export const TransferDialog = ({
             {message}
           </p>
           <div className="transfer-actions">
-            {exportMode === "raw" && (
+            {exportMode !== "command" && (
               <Button disabled={config.hasErrors} onClick={copyConfig}>
                 <Copy size={14} />
                 Copy Config

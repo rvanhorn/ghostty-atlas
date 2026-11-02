@@ -1,3 +1,8 @@
+// Keys whose every line counts, rather than only the last one.
+const repeatableKeys = ["font-family", "palette"];
+const joinValues = (key, values) =>
+  values.join(repeatableKeys.includes(key) ? "\n" : "");
+
 /* Lossless line-based editing: untouched directives, comments, order and EOLs survive. */
 export class ConfigDocument {
   constructor(source) {
@@ -20,12 +25,13 @@ export class ConfigDocument {
     const matches = this.lines
       .filter((line) => line.key === key)
       .map((line) => ConfigDocument.decode(line.value));
+    if (key === "palette") return matches;
     if (key !== "font-family") return matches.slice(-1);
     const reset = matches.lastIndexOf("");
     return matches.slice(reset + 1);
   }
   get(key) {
-    return this.values(key).join(key === "font-family" ? "\n" : "");
+    return joinValues(key, this.values(key));
   }
   set(key, values) {
     if (!/^[a-z][a-z0-9-]*$/.test(key))
@@ -36,9 +42,12 @@ export class ConfigDocument {
     const previous = this.edits.get(key);
     this.edits.delete(key);
     const original = this.get(key);
-    if (values.join(key === "font-family" ? "\n" : "") !== original)
-      this.edits.set(key, values);
+    if (joinValues(key, values) !== original) this.edits.set(key, values);
     return previous;
+  }
+  // An empty list removes every line of a key; font-family writes its reset line instead.
+  remove(key) {
+    return this.set(key, []);
   }
   export() {
     if (!this.edits.size) return this.source;
@@ -48,6 +57,7 @@ export class ConfigDocument {
     });
     const directive = (key) => {
       const values = this.edits.get(key);
+      if (!values.length && key !== "font-family") return "";
       // Reset the repeatable font list before replacing it with the edited chain.
       const reset =
         key === "font-family" && values.some(Boolean)

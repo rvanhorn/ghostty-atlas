@@ -1,3 +1,5 @@
+import { isAtLeast } from "./compatibility.js";
+
 const defaults = [
   ["", "Ghostty Default"],
   ["true", "On"],
@@ -10,6 +12,21 @@ export const fields = [
     group: "appearance",
     type: "fonts",
     placeholder: "JetBrains Mono",
+    // Offered as input suggestions and used by Randomize; any installed family works.
+    suggestions: [
+      "Geist Mono",
+      "JetBrains Mono",
+      "Fira Code",
+      "Cascadia Code",
+      "Iosevka",
+      "Hack",
+      "Source Code Pro",
+      "IBM Plex Mono",
+      "SF Mono",
+      "Menlo",
+      "Ubuntu Mono",
+      "DejaVu Sans Mono",
+    ],
     help: "Separate fallback families with commas. Fonts must be installed for Ghostty; browser availability may differ.",
   },
   {
@@ -28,7 +45,7 @@ export const fields = [
     label: "Background Opacity",
     group: "appearance",
     type: "opacity",
-    help: "Text stays opaque. macOS requires a full restart; native fullscreen ignores transparency.",
+    help: "Text stays opaque. macOS native fullscreen ignores transparency.",
   },
   {
     key: "background-blur",
@@ -41,7 +58,7 @@ export const fields = [
       ["10", "Subtle · 10"],
       ["30", "Strong · 30"],
     ],
-    help: "Requires transparency. Supported by macOS and some Linux desktops.",
+    help: "Requires transparency.",
   },
   {
     key: "window-padding-x",
@@ -57,7 +74,7 @@ export const fields = [
     group: "appearance",
     type: "padding",
     placeholder: "Default",
-    help: "Points. Use one value for both sides, or top,bottom. Padding changes apply to new terminals.",
+    help: "Points. Use one value for both sides, or top,bottom.",
   },
   {
     key: "window-padding-balance",
@@ -109,11 +126,23 @@ export const fields = [
     group: "interaction",
     options: [
       ["", "Ghostty Default"],
-      ["true", "Automatic"],
+      ["none", "Off"],
+      ["primary", "Selection Clipboard"],
       ["clipboard", "System Clipboard"],
-      ["false", "Off"],
+      ["both", "Both Clipboards"],
     ],
-    help: "Automatic prefers the selection clipboard where available. System clipboard also replaces your regular clipboard.",
+    help: "The selection clipboard is the one middle-click pastes from. Ghostty Default is Selection Clipboard on Linux and Off on macOS.",
+    // Ghostty 1.4 replaced these values; earlier targets offer the values they accept.
+    earlierVersions: {
+      before: "1.4",
+      options: [
+        ["", "Ghostty Default"],
+        ["true", "Automatic"],
+        ["clipboard", "System Clipboard"],
+        ["false", "Off"],
+      ],
+      help: "Automatic prefers the selection clipboard where available. System Clipboard also copies to the selection clipboard.",
+    },
   },
   {
     key: "scrollback-limit",
@@ -146,6 +175,57 @@ export const fields = [
     help: "“Never” can close a running process without a warning.",
   },
   {
+    key: "quit-after-last-window-closed",
+    label: "Quit After Last Window",
+    group: "interaction",
+    options: defaults,
+    help: "Ghostty Default keeps the app running with no windows on macOS and quits on Linux.",
+  },
+  {
+    key: "window-theme",
+    label: "Window Appearance",
+    group: "window",
+    options: [
+      ["", "Ghostty Default"],
+      ["auto", "Match Terminal"],
+      ["system", "Match System"],
+      ["light", "Light"],
+      ["dark", "Dark"],
+      ["ghostty", "Ghostty Colors (Linux)"],
+    ],
+    help: "Colors the titlebar and other window controls. Ghostty Colors uses your terminal colors, or the titlebar colors in the Linux section, and works only on Linux. On macOS, transparent and integrated titlebars follow the terminal background instead.",
+  },
+  {
+    key: "window-decoration",
+    label: "Window Decorations",
+    group: "window",
+    options: [
+      ["", "Ghostty Default"],
+      ["auto", "Automatic"],
+      ["client", "Client-Side"],
+      ["server", "Server-Side"],
+      ["none", "None"],
+    ],
+    help: "A preference your desktop can override. Server-Side matters only on Linux, on X11 or on Wayland desktops that support it, such as KDE Plasma; otherwise Ghostty draws its own. None removes the titlebar and borders, and on macOS also tabs.",
+  },
+  {
+    key: "window-title-font-family",
+    label: "Title & Tab Font",
+    group: "window",
+    type: "text",
+    placeholder: "System Default",
+    suggestions: [
+      "Geist",
+      "Inter",
+      "SF Pro",
+      "Helvetica Neue",
+      "Cantarell",
+      "Noto Sans",
+      "Ubuntu",
+    ],
+    help: "One installed font family for window and tab titles. Browser availability may differ.",
+  },
+  {
     key: "macos-titlebar-style",
     label: "Titlebar & Tabs",
     group: "macos",
@@ -156,28 +236,7 @@ export const fields = [
       ["tabs", "Integrated Tabs"],
       ["hidden", "Hidden"],
     ],
-    help: "macOS only. Integrated tabs follow the terminal background. Hidden removes the tab bar; new tabs open as windows. Style changes apply to new windows.",
-  },
-  {
-    key: "window-theme",
-    label: "Window Appearance",
-    group: "macos",
-    options: [
-      ["", "Ghostty Default"],
-      ["auto", "Match Terminal"],
-      ["system", "Match System"],
-      ["light", "Light"],
-      ["dark", "Dark"],
-    ],
-    help: "Controls the native titlebar. Transparent and integrated styles follow the terminal background on macOS regardless of this setting.",
-  },
-  {
-    key: "window-title-font-family",
-    label: "Title & Tab Font",
-    group: "macos",
-    type: "text",
-    placeholder: "System Default",
-    help: "One installed font family for window and tab titles. Also supported on Linux; browser availability may differ.",
+    help: "Integrated tabs follow the terminal background. Hidden removes the tab bar; new tabs open as windows.",
   },
   {
     key: "macos-window-buttons",
@@ -188,7 +247,7 @@ export const fields = [
       ["visible", "Visible"],
       ["hidden", "Hidden"],
     ],
-    help: "Show or hide the macOS traffic lights. Changes apply to new windows; a hidden titlebar always hides them.",
+    help: "Show or hide the macOS traffic lights. A hidden titlebar always hides them.",
   },
   {
     key: "macos-titlebar-proxy-icon",
@@ -199,7 +258,7 @@ export const fields = [
       ["visible", "Visible"],
       ["hidden", "Hidden"],
     ],
-    help: "macOS native titlebar only. Updates after the working directory changes. Tab colors, height and corner shape are managed by macOS.",
+    help: "Native titlebar only. Tab colors, height and corner shape are managed by macOS.",
   },
   {
     key: "macos-option-as-alt",
@@ -215,10 +274,111 @@ export const fields = [
     help: "Enables terminal Alt shortcuts; that Option key can no longer type special characters the usual macOS way.",
   },
   {
-    key: "quit-after-last-window-closed",
-    label: "Quit After Last Window",
+    key: "macos-window-shadow",
+    label: "Window Shadow",
     group: "macos",
     options: defaults,
-    help: "Also supported on Linux. macOS normally keeps the app running with no windows.",
+    help: "The shadow macOS draws around Ghostty windows. Some window managers and transparent windows look better without it.",
+  },
+  {
+    key: "gtk-titlebar",
+    label: "GTK Titlebar",
+    group: "linux",
+    options: defaults,
+    help: "Shows Ghostty’s full titlebar instead of your window manager’s simple one. Has no effect when Window Decorations is None.",
+  },
+  {
+    key: "gtk-titlebar-style",
+    label: "Titlebar Style",
+    group: "linux",
+    options: [
+      ["", "Ghostty Default"],
+      ["native", "Native"],
+      ["tabs", "Tabs in Titlebar"],
+    ],
+    help: "Tabs in Titlebar merges the tab bar into the titlebar to save space; the window can no longer be dragged by its tab titles.",
+  },
+  {
+    key: "gtk-titlebar-hide-when-maximized",
+    label: "Hide Titlebar When Maximized",
+    group: "linux",
+    options: defaults,
+  },
+  {
+    key: "window-show-tab-bar",
+    label: "Show Tab Bar",
+    group: "linux",
+    options: [
+      ["", "Ghostty Default"],
+      ["auto", "With Two or More Tabs"],
+      ["always", "Always"],
+      ["never", "Never"],
+    ],
+    help: "With Never, switch tabs with the tab overview or keybindings.",
+  },
+  {
+    key: "gtk-tabs-location",
+    label: "Tab Bar Position",
+    group: "linux",
+    options: [
+      ["", "Ghostty Default"],
+      ["top", "Top"],
+      ["bottom", "Bottom"],
+    ],
+    help: "To hide the tab bar, use Show Tab Bar.",
+  },
+  {
+    key: "gtk-wide-tabs",
+    label: "Wide Tabs",
+    group: "linux",
+    options: defaults,
+    help: "On, tabs fill the tab bar in the GNOME style. Off, each tab takes only the space it needs.",
+  },
+  {
+    key: "gtk-toolbar-style",
+    label: "Bar Style",
+    group: "linux",
+    options: [
+      ["", "Ghostty Default"],
+      ["flat", "Flat"],
+      ["raised", "Raised"],
+      ["raised-border", "Raised with Border"],
+    ],
+    help: "How the titlebar and tab bar meet the terminal: flat, with a shadow, or with a thin border instead of the shadow.",
+  },
+  {
+    key: "window-subtitle",
+    label: "Window Subtitle",
+    group: "linux",
+    options: [
+      ["", "Ghostty Default"],
+      ["false", "Off"],
+      ["working-directory", "Working Directory"],
+    ],
+    help: "Shows the terminal’s working directory under the window title.",
+  },
+  {
+    key: "window-titlebar-background",
+    label: "Titlebar Background",
+    group: "linux",
+    type: "color",
+    placeholder: "Terminal Background",
+    help: "A hex color, as in #1e1e2e, or an X11 color name. Used only when Window Appearance is Ghostty Colors.",
+  },
+  {
+    key: "window-titlebar-foreground",
+    label: "Titlebar Text",
+    group: "linux",
+    type: "color",
+    placeholder: "Terminal Foreground",
+    help: "A hex color, as in #cdd6f4, or an X11 color name. Used only when Window Appearance is Ghostty Colors.",
   },
 ];
+
+/* The field as shown for a target Ghostty version. Fields whose values changed in a
+   release declare the earlier options and help; imported values stay selectable either way. */
+export const fieldForTarget = (field, target) => {
+  const earlier = field.earlierVersions;
+  if (!earlier || isAtLeast(target.version, earlier.before)) return field;
+  return { ...field, options: earlier.options, help: earlier.help };
+};

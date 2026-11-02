@@ -1,5 +1,6 @@
 import { previewSupport } from "./preview-support.js";
 import { SelectControl } from "../../components/ui/select.jsx";
+import { FindingList } from "./review-panel.jsx";
 
 export const SettingField = ({
   field,
@@ -7,13 +8,16 @@ export const SettingField = ({
   error,
   onChange,
   previewRequirement,
+  compatibility = [],
 }) => {
   const support = previewSupport[field.key];
   const numeric = field.type === "number" || field.type === "opacity";
   const inputId = `setting-${field.key}`;
   const descriptionId = `${inputId}-description`;
+  const suggestionsId = field.suggestions && `${inputId}-suggestions`;
   const inputProps = {
     id: inputId,
+    list: suggestionsId || undefined,
     disabled: Boolean(previewRequirement),
     value,
     "aria-invalid": Boolean(error),
@@ -36,6 +40,11 @@ export const SettingField = ({
         </label>
         <p id={descriptionId} className={error ? "field-error" : "field-help"}>
           {error || field.help || "Leave empty to use the Ghostty Default."}
+          {compatibility.length > 0 && (
+            <span className="field-compat">
+              <FindingList findings={compatibility} />
+            </span>
+          )}
           {support.note && (
             <span className="field-preview-note">{support.note}</span>
           )}
@@ -85,6 +94,13 @@ export const SettingField = ({
             step={field.type === "opacity" ? 0.01 : field.step}
             inputMode={numeric ? "decimal" : undefined}
           />
+        )}
+        {suggestionsId && (
+          <datalist id={suggestionsId}>
+            {field.suggestions.map((font) => (
+              <option key={font} value={font} />
+            ))}
+          </datalist>
         )}
       </div>
     </div>

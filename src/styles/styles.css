@@ -21,6 +21,8 @@
   --primary: #287fb8;
   --primary-hover: #3194d2;
   --error: #f4a7a7;
+  --warning: #ecc98a;
+  --added: #9fd8a9;
   --radius-panel: 8px;
   --radius-control: 4px;
   --space-1: 4px;
@@ -244,34 +246,6 @@ a {
     width: clamp(200px, 38vw, 480px);
   }
 }
-@media (max-width: 600px) {
-  .app-header {
-    padding: 8px 16px;
-    gap: 8px;
-  }
-  .brand.button {
-    font-size: 14px;
-  }
-  .header-right {
-    gap: 4px;
-  }
-  .header-right .button {
-    padding: 8px;
-    font-size: 14px;
-  }
-  .header-right svg {
-    width: 14px;
-  }
-  .header-center {
-    flex-wrap: wrap;
-    gap: 8px;
-    justify-content: flex-start;
-  }
-  .search-control {
-    flex: 1 1 100%;
-    min-width: 180px;
-  }
-}
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -286,11 +260,83 @@ a {
     flex-wrap: wrap;
   }
 }
-@media (max-width: 600px) {
-  .header-right {
-    margin-left: auto;
+/* Touch layouts have no keyboard shortcut to show. */
+@media (pointer: coarse) {
+  .search-shortcut {
+    display: none;
+  }
+}
+/* Compact layouts, matching compactLayoutQuery in use-media-query.js: search
+   gets its own row, and controls meet a 44px touch target. */
+@media (max-width: 800px), (pointer: coarse) and (max-height: 520px) {
+  .app-header {
+    gap: 8px 12px;
+    padding: max(8px, env(safe-area-inset-top))
+      max(16px, env(safe-area-inset-right)) 8px
+      max(16px, env(safe-area-inset-left));
   }
   .brand.button {
     font-size: 14px;
+  }
+  .header-center {
+    flex-wrap: nowrap;
+    gap: 8px;
+    margin: 0;
+  }
+  .header-right {
+    gap: 4px;
+    margin-left: auto;
+  }
+  .search-control {
+    flex: 1 1 auto;
+    width: auto;
+    min-width: 0;
+    height: 44px;
+  }
+  /* 16px keeps mobile Safari from zooming the page when the field takes focus. */
+  .search-control input {
+    font-size: 16px;
+  }
+  .search-shortcut {
+    display: none;
+  }
+  .search-control .clear-search {
+    min-width: 32px;
+    min-height: 32px;
+  }
+  .header-toggle-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+  .header-center > .button,
+  .header-right .button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
+/* The narrowest phones keep the brand, Settings, and the menu on one row. */
+@media (max-width: 400px) {
+  .brand-version {
+    display: none;
+  }
+}
+@media (max-width: 360px) {
+  .app-header {
+    column-gap: 8px;
+    padding-inline: max(12px, env(safe-area-inset-left))
+      max(12px, env(safe-area-inset-right));
+  }
+}
+/* Phones in landscape keep the header to one row. */
+@media (pointer: coarse) and (max-height: 520px) and (min-width: 801px) {
+  .header-center {
+    order: 0;
+    flex: 1;
+    width: auto;
   }
 }

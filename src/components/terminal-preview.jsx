@@ -1,11 +1,11 @@
 import { useEffect, useId, useMemo, useState } from "react";
 import { Popover } from "@base-ui/react/popover";
-import { CircleHelp, Folder } from "lucide-react";
-import { getConfigurationPreview } from "../features/config/preview.js";
+import { CircleHelp, Folder, X } from "lucide-react";
 import {
-  adjustContrast,
-  resolveWindowAppearance,
-} from "../features/config/contrast.js";
+  getConfigurationPreview,
+  getWindowAppearance,
+} from "../features/config/preview.js";
+import { adjustContrast } from "../features/config/contrast.js";
 import { usePreviewMetrics } from "../features/config/use-preview-metrics.js";
 import { TerminalSample } from "./terminal-sample.jsx";
 
@@ -14,9 +14,11 @@ export const TerminalPreview = ({
   sample,
   compact = false,
   document,
+  platform = "macos",
   scrollRef,
   label = "Terminal Preview",
 }) => {
+  const linux = platform === "linux";
   const panelId = useId();
   const [activeTab, setActiveTab] = useState("shell");
   const preview = useMemo(() => getConfigurationPreview(document), [document]);
@@ -57,7 +59,31 @@ export const TerminalPreview = ({
         textColor(color),
       ]),
     ),
+    // Minimum contrast changes text only, so color blocks keep the palette color.
+    ...Object.fromEntries(
+      theme.palette.map((color, index) => [`--ansi-bg-${index}`, color]),
+    ),
+    // Linux titlebars with window-theme = ghostty.
+    "--titlebar-bg": preview.titlebarBackground || theme.bg,
+    "--titlebar-fg": preview.titlebarForeground || theme.fg,
   };
+  const title =
+    activeTab === "editor" ? "config — nvim" : `${theme.name} · zsh`;
+  // Linux chrome: Ghostty's GTK titlebar, or a plain window manager titlebar, and a
+  // tab bar that can sit in the titlebar, above the terminal, or below it.
+  const linuxTitlebar = linux && !compact && !preview.hideDecoration;
+  const linuxTabBar = linux && !compact && preview.tabBar !== "never";
+  const tabsInTitlebar =
+    linuxTitlebar &&
+    linuxTabBar &&
+    preview.gtkTitlebar &&
+    preview.gtkTitlebarStyle === "tabs";
+  const separateTabBar = linuxTabBar && !tabsInTitlebar;
+  const linuxControls = (
+    <span className="gtk-window-controls" aria-hidden="true">
+      <X size={14} />
+    </span>
+  );
   const tabs = (
     <div
       className="preview-tabbar"
@@ -106,11 +132,14 @@ export const TerminalPreview = ({
       style={variables}
       data-cursor={preview.cursor || "block"}
       data-blink={!compact && preview.blink}
-      data-titlebar={preview.titlebar}
-      data-window-appearance={resolveWindowAppearance(
-        preview.windowAppearance || "auto",
+      data-platform={platform}
+      data-titlebar={linux ? undefined : preview.titlebar}
+      data-toolbar-style={linux ? preview.toolbarStyle : undefined}
+      data-wide-tabs={linux ? preview.wideTabs : undefined}
+      data-window-appearance={getWindowAppearance(
+        preview,
+        platform,
         theme.bg,
-        preview.titlebar,
         systemDark,
       )}
     >
@@ -147,9 +176,15 @@ export const TerminalPreview = ({
                 <Popover.Description>
                   Fonts depend on browser availability. Blur, contrast, and
                   window chrome are approximations; font size and padding use a
-                  1:1 logical-pixel scale. Behavior settings marked “Config
-                  Only” are saved to your config but cannot run in this static
-                  sample. Reduced motion disables cursor blinking.
+                  1:1 logical-pixel scale. Box-drawing and block characters come
+                  from the browser font, while Ghostty draws them itself, so
+                  line joins and weights can differ. Bold, italic, dim,
+                  underline, and inverse text use browser styles. Behavior
+                  settings marked “Config Only” are saved to your config but
+                  cannot run in this static sample. Reduced motion disables
+                  cursor blinking. The Platform choice draws macOS or Linux
+                  window chrome; the Linux chrome follows GNOME, and other
+                  desktops can differ.
                   {fontNotice && (
                     <span className="field-preview-note">{fontNotice}</span>
                   )}
@@ -159,37 +194,66 @@ export const TerminalPreview = ({
           </Popover.Portal>
         </Popover.Root>
       )}
-      {!compact && preview.titlebar !== "hidden" && !preview.hideDecoration && (
+      {(linuxTitlebar ||
+        (separateTabBar && preview.tabsLocation !== "bottom")) && (
         <div
           className="terminal-window-header"
           style={{ fontFamily: preview.titleFont }}
         >
-          <div className="terminal-chrome">
-            {!preview.hideButtons && (
-              <span className="window-lights" aria-hidden="true">
-                <i />
-                <i />
-                <i />
-              </span>
-            )}
-            {preview.titlebar === "tabs" ? (
-              tabs
-            ) : (
-              <>
-                {preview.titlebar === "native" && !preview.hideProxy && (
-                  <Folder size={12} aria-hidden="true" />
+          {linuxTitlebar &&
+            (preview.gtkTitlebar ? (
+              <div className="terminal-chrome">
+                {tabsInTitlebar ? (
+                  tabs
+                ) : (
+                  <span className="gtk-title">
+                    <span>{title}</span>
+                    {preview.subtitle && (
+                      <span className="gtk-subtitle">~/atlas</span>
+                    )}
+                  </span>
                 )}
-                <span>
-                  {activeTab === "editor"
-                    ? "config — nvim"
-                    : `${theme.name} · zsh`}
-                </span>
-              </>
-            )}
-          </div>
-          {preview.titlebar !== "tabs" && tabs}
+                {linuxControls}
+              </div>
+            ) : (
+              <div className="terminal-chrome terminal-chrome--plain">
+                <span>{title}</span>
+                {linuxControls}
+              </div>
+            ))}
+          {separateTabBar && preview.tabsLocation !== "bottom" && tabs}
         </div>
       )}
+      {!compact &&
+        !linux &&
+        preview.titlebar !== "hidden" &&
+        !preview.hideDecoration && (
+          <div
+            className="terminal-window-header"
+            style={{ fontFamily: preview.titleFont }}
+          >
+            <div className="terminal-chrome">
+              {!preview.hideButtons && (
+                <span className="window-lights" aria-hidden="true">
+                  <i />
+                  <i />
+                  <i />
+                </span>
+              )}
+              {preview.titlebar === "tabs" ? (
+                tabs
+              ) : (
+                <>
+                  {preview.titlebar === "native" && !preview.hideProxy && (
+                    <Folder size={12} aria-hidden="true" />
+                  )}
+                  <span>{title}</span>
+                </>
+              )}
+            </div>
+            {preview.titlebar !== "tabs" && tabs}
+          </div>
+        )}
       <div
         className="terminal-scroll"
         ref={(element) => {
@@ -230,6 +294,14 @@ export const TerminalPreview = ({
           ))}
         </div>
       </div>
+      {separateTabBar && preview.tabsLocation === "bottom" && (
+        <div
+          className="terminal-window-header terminal-window-footer"
+          style={{ fontFamily: preview.titleFont }}
+        >
+          {tabs}
+        </div>
+      )}
     </div>
   );
 };

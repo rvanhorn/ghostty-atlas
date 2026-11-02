@@ -1,9 +1,19 @@
 import { Switch } from "@base-ui/react/switch";
+import { X } from "lucide-react";
 import { SelectControl } from "../../components/ui/select.jsx";
 import { Button } from "../../components/ui/button.jsx";
 import { countActiveFilters } from "./catalog.js";
+import { colorFamilies } from "./color-families.js";
+import { getSortOptions } from "./discovery.js";
 
-const filterDefinitions = [
+const colorOptions = (counts) =>
+  colorFamilies.map((family) => [
+    family.key,
+    family.label,
+    { swatch: family.swatch, count: counts?.[family.key] },
+  ]);
+
+const getFilterDefinitions = (optionCounts) => [
   {
     key: "appearance",
     label: "Appearance",
@@ -14,16 +24,16 @@ const filterDefinitions = [
     ],
   },
   {
-    key: "accent",
-    label: "Palette",
-    placeholder: "All Palettes",
-    options: [
-      ["warm", "Warm"],
-      ["cool", "Cool"],
-      ["green", "Green"],
-      ["purple", "Purple"],
-      ["neutral", "Neutral"],
-    ],
+    key: "tint",
+    label: "Background Tint",
+    placeholder: "Any Tint",
+    options: colorOptions(optionCounts?.tint),
+  },
+  {
+    key: "accents",
+    label: "Accent Colors",
+    placeholder: "Any Accents",
+    options: colorOptions(optionCounts?.accents),
   },
   {
     key: "contrast",
@@ -37,9 +47,26 @@ const filterDefinitions = [
   },
 ];
 
+const FilterSwitch = ({ checked, onCheckedChange, children }) => (
+  <label className="filter-bar-switch">
+    <Switch.Root
+      checked={checked}
+      onCheckedChange={onCheckedChange}
+      className="switch"
+    >
+      <Switch.Thumb className="switch-thumb" />
+    </Switch.Root>
+    {children}
+  </label>
+);
+
 export const FilterBar = ({
   filters,
   onFilterChange,
+  optionCounts,
+  familyName,
+  sort,
+  onSortChange,
   onReset,
   resultCount,
   open,
@@ -57,7 +84,7 @@ export const FilterBar = ({
         className="filter-bar"
         aria-label="Theme Filters"
       >
-        {filterDefinitions.map((filter) => (
+        {getFilterDefinitions(optionCounts).map((filter) => (
           <div className="filter-bar-field" key={filter.key}>
             <label htmlFor={`filter-${filter.key}`}>{filter.label}</label>
             <SelectControl
@@ -71,16 +98,43 @@ export const FilterBar = ({
             />
           </div>
         ))}
-        <label className="filter-bar-saved">
-          <Switch.Root
-            checked={filters.savedOnly}
-            onCheckedChange={(checked) => onFilterChange("savedOnly", checked)}
-            className="switch"
-          >
-            <Switch.Thumb className="switch-thumb" />
-          </Switch.Root>
+        <FilterSwitch
+          checked={filters.lightAndDark}
+          onCheckedChange={(checked) => onFilterChange("lightAndDark", checked)}
+        >
+          Light & Dark Families
+        </FilterSwitch>
+        <FilterSwitch
+          checked={filters.savedOnly}
+          onCheckedChange={(checked) => onFilterChange("savedOnly", checked)}
+        >
           Saved Only
-        </label>
+        </FilterSwitch>
+        <div className="filter-bar-field">
+          <label htmlFor="theme-sort">Sort</label>
+          <SelectControl
+            id="theme-sort"
+            label="Sort Themes"
+            options={getSortOptions(sort)}
+            value={sort.order}
+            onValueChange={(order) => onSortChange({ ...sort, order })}
+          />
+        </div>
+        {filters.family && (
+          <div className="filter-bar-family">
+            <span>
+              Family: <strong>{familyName}</strong>
+            </span>
+            <Button
+              variant="quiet"
+              className="icon-button"
+              aria-label="Clear Family Filter"
+              onClick={() => onFilterChange("family", null)}
+            >
+              <X size={14} />
+            </Button>
+          </div>
+        )}
         <div className="filter-bar-summary">
           <Button variant="quiet" onClick={onReset} disabled={!activeCount}>
             Reset Filters

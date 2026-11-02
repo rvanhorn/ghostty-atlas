@@ -30,6 +30,13 @@ export const validateSetting = (field, value) => {
       value.split(",").some((part) => !Number.isFinite(Number(part))))
   )
     return "Use a non-negative number, or two comma-separated numbers.";
+  // Ghostty reads hex colors with or without # and X11 color names such as "dark slate gray".
+  if (
+    field.type === "color" &&
+    !/^#?[0-9a-f]{6}$/i.test(value) &&
+    !/^[a-z][a-z0-9 ]*$/i.test(value)
+  )
+    return "Enter a hex color, as in #1e1e2e, or an X11 color name.";
   if (field.type === "fonts" && /["\\\r\0]/.test(value))
     return "Use plain font names, one per line (no quotes or backslashes).";
   return "";

@@ -6,6 +6,7 @@ import {
   defaultFilters,
   countActiveFilters,
 } from "../src/features/gallery/catalog.js";
+import { getColorFacets } from "../src/features/gallery/color-families.js";
 import {
   updateComparison,
   getAdjacentTheme,
@@ -18,7 +19,9 @@ import {
   parseImport,
   validateSetting,
 } from "../src/features/config/validation.js";
-import { fields } from "../src/features/config/fields.js";
+import { fieldForTarget, fields } from "../src/features/config/fields.js";
+import * as settingCategoriesModule from "../src/features/config/categories.js";
+import { checkSetting } from "../src/features/config/compatibility.js";
 import {
   readPreferences,
   writePreferences,
@@ -184,37 +187,146 @@ test("settings categories expose every editable setting exactly once", async () 
   const categorizedKeys = settingCategories.flatMap(
     (category) => category.keys,
   );
-  assert.equal(settingCategories.length, 6);
+  const { colorConfigKeys } =
+    await import("../src/features/palette/palette.js");
+  assert.deepEqual(
+    settingCategories.map(({ label }) => label),
+    [
+      "Typography",
+      "Palette",
+      "Background",
+      "Layout",
+      "Cursor",
+      "Behavior",
+      "Window",
+      "macOS",
+      "Linux",
+    ],
+  );
   assert.equal(new Set(categorizedKeys).size, categorizedKeys.length);
+  // Issue #4: the Palette category holds the color settings its editor writes.
   assert.deepEqual(
     [...categorizedKeys].sort(),
-    fields.map((field) => field.key).sort(),
+    [...fields.map((field) => field.key), ...colorConfigKeys].sort(),
   );
+  // Issue #13: shared settings leave macOS; macOS keeps its four and gains the
+  // shadow; Linux exposes the initial GTK and window controls.
+  const keysOf = (id) => settingCategories.find((c) => c.id === id).keys;
+  assert.deepEqual(keysOf("window"), [
+    "window-theme",
+    "window-decoration",
+    "window-title-font-family",
+  ]);
+  assert.ok(keysOf("behavior").includes("quit-after-last-window-closed"));
+  assert.deepEqual([...keysOf("macos")].sort(), [
+    "macos-option-as-alt",
+    "macos-titlebar-proxy-icon",
+    "macos-titlebar-style",
+    "macos-window-buttons",
+    "macos-window-shadow",
+  ]);
+  assert.deepEqual([...keysOf("linux")].sort(), [
+    "gtk-tabs-location",
+    "gtk-titlebar",
+    "gtk-titlebar-hide-when-maximized",
+    "gtk-titlebar-style",
+    "gtk-toolbar-style",
+    "gtk-wide-tabs",
+    "window-show-tab-bar",
+    "window-subtitle",
+    "window-titlebar-background",
+    "window-titlebar-foreground",
+  ]);
+  const windowTheme = fields.find((field) => field.key === "window-theme");
+  assert.ok(windowTheme.options.some(([value]) => value === "ghostty"));
+});
+
+/* Issue #13: imported unknown and other-platform directives stay lossless while
+   settings in each category are edited, validated, reset, and exported. */
+test("category edits and resets keep unknown and other-platform directives", () => {
+  const { settingCategories } = settingCategoriesModule;
+  const source =
+    "# mine\r\ngtk-custom-css = ~/.config/ghostty/extra.css\r\nmacos-titlebar-style = tabs\r\nlinux-cgroup = never\r\nwindow-theme = ghostty\r\nfuture-key = 1\r\n";
+  let state = createConfigState(source);
+  const edits = {
+    "window-decoration": "server",
+    "gtk-titlebar-style": "tabs",
+    "macos-window-shadow": "false",
+    "window-titlebar-background": "dark slate gray",
+    "quit-after-last-window-closed": "true",
+  };
+  for (const [key, value] of Object.entries(edits))
+    state = changeField(
+      state,
+      fields.find((field) => field.key === key),
+      value,
+    );
+  assert.deepEqual(state.errors, {});
+  const exported = state.document.export();
+  for (const line of source.split("\r\n").filter(Boolean))
+    assert.ok(exported.includes(`${line}\r\n`), line);
+  for (const [key, value] of Object.entries(edits))
+    assert.ok(exported.includes(`${key} = ${value}\r\n`), key);
+
+  const invalid = changeField(
+    state,
+    fields.find((field) => field.key === "window-titlebar-foreground"),
+    "#12345",
+  );
+  assert.ok(invalid.errors["window-titlebar-foreground"]);
+  assert.equal(invalid.document.export(), exported);
+
+  for (const { keys } of settingCategories)
+    state = configReducer(state, { type: "reset", keys });
+  assert.equal(state.document.export(), source);
+});
+
+/* Issue #13 defect from #7: Copy On Select offers the values of the target version,
+   and an imported value from another version is kept as written. */
+test("copy-on-select options follow the target Ghostty version", () => {
+  const copyOnSelect = fields.find((field) => field.key === "copy-on-select");
+  const values = (version) =>
+    fieldForTarget(copyOnSelect, { platform: "linux", version }).options.map(
+      ([value]) => value,
+    );
+  assert.deepEqual(values("1.4"), ["", "none", "primary", "clipboard", "both"]);
+  assert.deepEqual(values("1.3"), ["", "true", "clipboard", "false"]);
+  for (const version of ["1.3", "1.4"])
+    values(version)
+      .filter(Boolean)
+      .forEach((value) =>
+        assert.ok(
+          !checkSetting("copy-on-select", [value], {
+            platform: "macos",
+            version,
+          }).some(({ level }) => level !== "info"),
+          `${value} on ${version}`,
+        ),
+      );
+  const imported = createConfigState("copy-on-select = true\n");
+  assert.equal(imported.document.export(), "copy-on-select = true\n");
 });
 
 test("filters combine multiple selections with OR within a group and AND across groups", () => {
   const filters = {
+    ...defaultFilters,
     appearance: ["dark", "light"],
-    accent: ["warm", "cool"],
+    tint: ["blue", "neutral"],
+    accents: ["green", "purple"],
     contrast: ["high", "balanced"],
-    savedOnly: false,
   };
   const expected = themes.filter(
     (theme) =>
-      ["warm", "cool"].includes(theme.accent) &&
+      ["blue", "neutral"].includes(getColorFacets(theme).tint) &&
+      getColorFacets(theme).accents.some((family) =>
+        ["green", "purple"].includes(family),
+      ) &&
       ["high", "balanced"].includes(theme.contrast),
   );
+  assert.ok(expected.length > 0 && expected.length < themes.length);
   assert.deepEqual(filterThemes(themes, "", filters, []), expected);
-  assert.equal(countActiveFilters(filters), 3);
-  assert.equal(
-    countActiveFilters({
-      appearance: [],
-      accent: [],
-      contrast: [],
-      savedOnly: false,
-    }),
-    0,
-  );
+  assert.equal(countActiveFilters(filters), 4);
+  assert.equal(countActiveFilters(defaultFilters), 0);
   assert.equal(
     filterThemes(
       themes,

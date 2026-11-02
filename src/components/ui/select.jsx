@@ -13,9 +13,12 @@ export const SelectControl = ({
   multiple = false,
   placeholder,
 }) => {
-  const items = options.map(([optionValue, optionLabel]) => ({
+  // An option may add { swatch, count }: a color shown before its label and a number after it.
+  const items = options.map(([optionValue, optionLabel, details]) => ({
     value: optionValue,
     label: optionLabel,
+    swatch: details?.swatch,
+    count: details?.count,
   }));
   // Imported values can be newer than this editor's schema. Keep them selectable.
   if (!multiple && !items.some((item) => item.value === value))
@@ -62,10 +65,26 @@ export const SelectControl = ({
                 <Select.Item
                   key={item.value}
                   value={item.value}
-                  className="select-option"
+                  className={
+                    item.swatch || item.count !== undefined
+                      ? "select-option select-option--detailed"
+                      : "select-option"
+                  }
                 >
-                  <Select.ItemText>{item.label}</Select.ItemText>
-                  <Select.ItemIndicator>
+                  {item.swatch && (
+                    <span
+                      className="select-option-swatch"
+                      style={{ background: item.swatch }}
+                      aria-hidden="true"
+                    />
+                  )}
+                  <Select.ItemText className="select-option-text">
+                    {item.label}
+                  </Select.ItemText>
+                  {item.count !== undefined && (
+                    <span className="select-option-count">{item.count}</span>
+                  )}
+                  <Select.ItemIndicator className="select-option-indicator">
                     <Check size={14} />
                   </Select.ItemIndicator>
                 </Select.Item>

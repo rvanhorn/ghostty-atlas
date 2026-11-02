@@ -1,8 +1,21 @@
-const Ansi = ({ color, children }) => (
-  <span className={`ansi-${color}`}>{children}</span>
-);
+import {
+  Ansi,
+  AnsiSample,
+  DiffSample,
+  LogSample,
+  TuiSample,
+} from "./terminal-workflow-samples.jsx";
+
+const workflowSamples = {
+  ansi: AnsiSample,
+  diff: DiffSample,
+  log: LogSample,
+  tui: TuiSample,
+};
 
 export const TerminalSample = ({ sample, compact = false }) => {
+  const WorkflowSample = workflowSamples[sample];
+  if (WorkflowSample) return <WorkflowSample compact={compact} />;
   if (compact && sample === "shell")
     return (
       <>

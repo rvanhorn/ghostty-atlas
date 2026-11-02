@@ -7,11 +7,21 @@ Browse Ghostty themes, compare terminal palettes, and build a configuration with
 ## What You Can Do
 
 - Search themes by name or catalog number. `7` matches names and numbers containing `7`; `#7` selects catalog number 7 exactly.
-- Combine appearance, palette, contrast, and saved-theme filters.
+- Combine appearance, background tint, accent color, contrast, light and dark family, and saved-theme filters, with a count of matching themes beside each color.
+- See a theme's light and dark family, show only that family, or use its light and dark members as a pair.
+- Sort themes by background brightness or saturation in either direction, or find themes similar to one you like.
+- Inspect a theme's window colors and labeled ANSI colors 0–15, and copy any hex value.
 - Compare two themes with independent previews and lock either side while browsing.
-- Adjust typography, background, layout, cursor, behavior, and macOS settings.
+- Preview Shell, Code, Typography, ANSI Colors, Git Diff, Dense Log, and Terminal UI samples; both comparison sides show the same one.
+- Share a link to the current theme, or to a two-theme comparison, with the selected preview sample.
+- Configure separate light and dark themes, which Ghostty switches with the system appearance, and preview either one.
+- Adjust typography, palette, background, layout, cursor, behavior, window, macOS, and Linux settings, and preview macOS or Linux window chrome.
+- Randomize the theme and nearly every setting to explore new combinations, then undo a step or restore the config you started from.
+- Edit a theme's window and ANSI colors, then export them as a Ghostty theme file or import a theme file's colors.
 - Import an existing config without losing untouched comments, unknown directives, or line endings.
-- Copy or download the result, or download an installation script that backs up the existing config before replacing it.
+- Copy or download the result, or download a macOS and Linux installation script that backs up the existing config before replacing it. The script replaces the config file Ghostty already reads, including one in `~/.config/ghostty` on macOS, and names a new file `config.ghostty`, or `config` for a Ghostty 1.2 or earlier target.
+- Recover an unfinished config after a reload, and save, load, rename, and delete named presets such as Laptop, Work, and Presentation.
+- Browse, compare, and configure on a phone. At 800px and narrower, and on phones in landscape, the theme strip and preview fill the page, **Settings** opens the configuration in a drawer with a **Category** menu, **Share** and **Import / Export** move into a **More Actions** menu, and comparisons stack their two previews.
 
 The app uses React, Base UI, Vite, and bundled Geist fonts. Theme previews retain each terminal palette; the app interface has its own dark palette.
 
@@ -35,7 +45,7 @@ Open <http://127.0.0.1:5173>. For another port, run `pnpm dev --port 5191`. Inst
 | `pnpm build`             | Refresh themes and build the static site into `dist/`.                    |
 | `pnpm preview`           | Serve the production build locally; stop dev first or use another port.   |
 | `pnpm test`              | Run the Vitest suite once.                                                |
-| `pnpm test:browser`      | Check catalog interactions in Chromium and Firefox with Playwright.       |
+| `pnpm test:browser`      | Check core workflows in Chromium and Firefox with Playwright.             |
 | `pnpm benchmark:catalog` | Measure catalog rendering, search, DOM size, and scrolling.               |
 | `pnpm test:watch`        | Run Vitest in watch mode while editing.                                   |
 | `pnpm lint`              | Run Oxlint.                                                               |
@@ -65,7 +75,7 @@ Set `GITHUB_TOKEN` to authenticate the upstream GitHub API listing and avoid the
 
 [`.github/workflows/pages.yml`](.github/workflows/pages.yml) checks pull requests and deploys pushes to `main`. A manual run is also available in the Actions tab.
 
-The build job installs the locked dependencies, refreshes themes, and runs `pnpm check`. A separate browser job checks catalog interactions in Chromium and Firefox using the bundled catalog. Deployment requires both jobs to pass. Deployment permissions are limited to the deployment job. The workflow uses GitHub's Pages artifact and deployment actions; it does not commit build output or refreshed files back to the repository. See [CONTRIBUTING.md](CONTRIBUTING.md) for browser setup and catalog performance measurements.
+The build job installs the locked dependencies, refreshes themes, and runs `pnpm check`. A separate browser job checks core workflows in Chromium and Firefox using the bundled catalog and uploads screenshots and failure traces. Deployment requires both jobs to pass. Deployment permissions are limited to the deployment job. The workflow uses GitHub's Pages artifact and deployment actions; it does not commit build output or refreshed files back to the repository. See [CONTRIBUTING.md](CONTRIBUTING.md) for browser setup and catalog performance measurements.
 
 In repository **Settings → Pages**, select **GitHub Actions** as the publishing source. The project URL is <https://rvanhorn.github.io/ghostty-atlas/>.
 
@@ -84,21 +94,60 @@ Open <http://127.0.0.1:4173/ghostty-atlas/>. Other static hosts can publish `dis
 
 ## Storage and Preview Limits
 
-Bookmarks and comparison theme names are stored in each visitor's browser local storage. Config contents and drafts remain in tab memory and are lost on reload. Atlas has no backend, database, or account system; it does not write directly to a visitor's Ghostty installation.
+Bookmarks and comparison theme names are stored in each visitor's browser local storage under `ghostty-atlas`. The latest unfinished config is stored as a draft under `ghostty-atlas-draft`, and named presets under `ghostty-atlas-presets`, both in this browser's local storage only. On return, Atlas offers to restore or discard the draft, including its imported source, pending values, and values that still need fixing. Each record carries a version; Atlas leaves records from another version untouched, and works without saving when storage is unavailable or full. **Clear Saved Configs** in the Presets tab of Import / Export removes the draft and every preset but keeps bookmarks. Atlas has no backend, database, or account system; it does not write directly to a visitor's Ghostty installation.
 
-The preview is a static sample rather than an interactive terminal. Fonts depend on browser availability. Font size and padding use logical pixels; contrast, blur, transparency, padding balance, and window chrome approximate native rendering. Reduced motion disables cursor blinking. Controls marked **Config Only** affect the exported config without changing the sample. Controls marked **Approximate** describe browser simulations.
+**Share** builds a link at the deployed path with theme names and the preview sample in the query string: `?theme=Nord&sample=code` for one theme, or `?left=Nord&right=Dracula&sample=code` for a comparison. Sample values are `shell`, `code`, `text`, `ansi`, `diff`, `log`, and `tui`. Links never include config text, unknown directives, or file names. Atlas removes these values from the address once it reads them, names any unknown theme or sample it ignored, and still offers a stored draft; restoring that draft keeps its own theme and offers to apply the shared one. When clipboard access fails, the link stays selected in a read-only field for manual copying. With a light and dark pair, the link carries the previewed member as `?theme=`.
+
+Atlas prepares configs for Ghostty on macOS and Linux, the platforms Ghostty supports; it runs in any modern browser. Settings are grouped by where Ghostty uses them: **Window** holds window appearance, decorations, and the title font, which both platforms share; **macOS** and **Linux** hold settings only that platform reads, and the setting help names each setting's platform and first Ghostty version. **Platform** above the preview chooses macOS or Linux window chrome and is the same target as **Your Target** in Review Changes. The Linux chrome approximates a GNOME window with Ghostty's GTK titlebar, so other desktops and window managers can look different, and macOS titlebar settings do not affect it. Switching platforms or categories never changes the config; settings for the other platform and directives Atlas does not edit are kept as written.
+
+The preview is a static sample rather than an interactive terminal. Fonts depend on browser availability. Box-drawing and block characters come from the browser font, while Ghostty draws them itself, so line joins and weights can differ; bold, italic, dim, underline, and inverse text use browser styles. Font size and padding use logical pixels; contrast, blur, transparency, padding balance, and window chrome approximate native rendering. Reduced motion disables cursor blinking. Controls marked **Config Only** affect the exported config without changing the sample. Controls marked **Approximate** describe browser simulations.
 
 Import files are limited to 256 KB. Unknown settings are preserved, and invalid editable values block export until corrected. An unknown theme expression stays in the config while a labeled fallback palette is previewed.
+
+**Review Changes** in the Export tab compares the export with the imported or starter config and lists each added, removed, or modified setting with its lines. Atlas rewrites only the settings you edit, so comments, unknown directives, and line endings never appear as changes. The same view sets **Your Target**, a platform (macOS or Linux) and Ghostty version (1.0 to 1.4) that you choose; Atlas does not detect your installation, and the choice lasts for the session. For that target, the review and the setting help explain settings or values Ghostty does not support, deprecated values, and changes that need a restart or apply only to new windows or terminals, each with a link to Ghostty's documentation. The notes cover only the settings listed in `src/features/config/compatibility.js`; Atlas keeps every setting as written and checks nothing else.
+
+**Light & Dark** mode writes Ghostty's `theme = light:Name,dark:Name` form. Atlas does not detect the system appearance for the preview; the Light and Dark toggle chooses which member to preview, and theme cards set that member. An imported pair in either order, with any surrounding whitespace, stays unchanged until edited. Missing, unlabeled, or uncataloged members are explained and the expression is kept as written. Switching to **Single Theme** keeps the previewed member; switching back restores an imported pair or starts a pair with the current theme on both sides.
+
+**Palette** edits are written to the config as Ghostty color settings (`background`, `foreground`, `cursor-color`, `cursor-text`, `selection-background`, `selection-foreground`, and `palette = N=#rrggbb`), which Ghostty applies over any theme, including both members of a light and dark pair. The preview applies the same settings from an imported config. Atlas reads hex colors only; X11 color names stay in the config and are listed, and the preview shows the theme color for them. Undo history lasts for the session. **Export Theme File** writes the 22 colors to a theme file named after the theme; save it without an extension in `~/.config/ghostty/themes/` (or `$XDG_CONFIG_HOME/ghostty/themes/`) and set `theme = <name>`, or reference it by absolute path. The catalog itself never changes; new shared palettes belong in iTerm2 Color Schemes.
+
+**Randomize**, beside the Preview Sample menu, picks a catalog theme other than the current one and a value for nearly every setting, so the theme strip, editor, preview, and export all show the same result. Choices come from each setting's options for **Your Target**, practical ranges on the setting's step (for example font sizes 11 to 20 and opacity 0.7 to 1), and the fonts the Font Family and Title & Tab Font fields suggest. A light and dark pair stays a pair, with a light theme for the light member and a dark theme for the dark one. Settings that would do nothing return to Ghostty's default: blur without transparency, macOS Window Appearance and Titlebar Folder Icon without a native titlebar, window buttons and title font with a hidden titlebar, Linux titlebar colors without Ghostty Colors, titlebar style without the GTK titlebar, and tab position and wide tabs with the tab bar set to Never. Randomize leaves these unchanged:
+
+- Palette colors. The random catalog theme is the palette randomization, and color settings are your own edits that Ghostty applies over any theme.
+- Settings and values the target does not support or has deprecated, such as Linux settings for a macOS target, values that need a later Ghostty version, and `scrollback-limit` for Ghostty 1.4, which renamed it.
+- Comments and directives Atlas does not edit.
+
+It never sets Confirm Before Closing to Never, which could close a running process without a warning, and gives Font Family one family rather than a fallback list. **Undo Randomize** steps back one randomization; **Restore Previous Config** returns to the config from before the first randomization, including imported values. Both last until any other edit, and the history is not stored. The randomized config is saved as a draft like any other edit.
+
+## Filters and Theme Families
+
+Within one filter, any selected option matches; across filters, a theme must match every filter. **Background Tint** and **Accent Colors** sort colors into hue families by their OKLCH hue: Red (0–45°), Orange (45–80°), Yellow (80–120°), Green (120–170°), Cyan (170–235°), Blue (235–285°), Purple (285–330°), and Pink (330–360°), or Neutral when a color has too little chroma for its hue to show. Each option shows how many themes it would match with the current search and the other filters.
+
+- **Background Tint** is the background's hue family. A background counts as tinted at an OKLCH chroma of 0.015 or more, so Dracula's and Tokyo Night's dark blue-gray backgrounds count as Blue while Gruvbox Dark's gray and pure black count as Neutral.
+- **Accent Colors** describe what sets a theme's colors apart. ANSI slots follow a convention (slot 1 is red in nearly every theme), so raw chroma would mostly measure the convention: summing it made Red the accent of 596 of 890 themes. Instead, each of ANSI 1–6 and 9–14 and the cursor and selection colors, when its chroma is at least 0.04, scores its chroma divided by the catalog's median chroma for that slot, at most 3, and adds the score to the hue family it actually has. Dracula's blue slot is violet, so it counts for Purple. When a theme has at least one such color, each tinted gray among ANSI 0, 7, 8, 15 and the foreground (chroma 0.015 or more) adds 0.3 to its family, enough to break a near tie, as in Nord's blue-gray palette. A theme belongs to its two highest-scoring families, or to one when it scores at least twice the next; without a chromatic accent color it is Neutral. No family matches more than 40% of the catalog.
+
+Theme families group the light and dark variants of one theme by name. Atlas drops the last variant word (light, dark, day, night, dawn, dusk, or moon) and the words after it, so GitHub Dark Colorblind and GitHub Light Default are both GitHub. A leading variant word is dropped only when another name differs in just that word, so Night Owl and Light Owl form one family. A few named flavors are listed explicitly, such as Catppuccin Latte, Frappe, Macchiato, and Mocha, Kanagawa Dragon, Lotus, and Wave, Modus Operandi and Vivendi, and the Nightfox themes. **Light & Dark Families** shows only themes whose family has both a light and a dark member.
+
+The palette view lists the theme's family; selecting a member opens its palette. **Show Family** narrows the strip to that family until you clear it in the filter bar or reset the filters. In **Light & Dark** theme mode, **Use as Light & Dark Pair** sets the pair to the theme and its counterpart of the other appearance: the member whose name differs only in variant words, such as GitHub Light Colorblind for GitHub Dark Colorblind, or else the family's first member of that appearance.
+
+## Sorting and Similar Themes
+
+The palette button on each theme card opens its colors: background, foreground, cursor, selection, and ANSI 0–15, each labeled and copyable with a click, Enter, or Space. **Find Similar Themes** in that view sets the **Sort** order in the filter bar to similarity with that theme.
+
+Search and filters decide which themes appear; the sort order only arranges them. Similarity ranks the themes that match the current search and filters, leaves out the theme it compares against, and stays available in **Sort** until another theme replaces it. Clearing the search or filters keeps the sort order. When nothing matches, **Clear Search and Filters** restores the list in the same order.
+
+Atlas computes these orders from the bundled palettes in the browser, with no tags to maintain. Colors are compared in OKLab, a perceptual color space where equal distances look about equally different. Brightness is the background's OKLab lightness and saturation its OKLCH chroma. Similarity is a weighted mean of color distances: background 40%, because it fills most of the terminal; foreground 20%, because it colors most text; and the 16 ANSI colors 40% together, because they shape prompts and syntax but each covers little of the screen. Equal values are ordered by theme name, so every order is deterministic.
 
 ## Repository Layout
 
 | Path                       | Contents                                                                   |
 | -------------------------- | -------------------------------------------------------------------------- |
 | `src/components/`          | Header, cards, theme picker, controls, and terminal preview.               |
-| `src/features/gallery/`    | Catalog filters and the scrolling theme strip.                             |
+| `src/features/gallery/`    | Catalog filters, sorting, similarity, the strip, and the palette view.     |
 | `src/features/comparison/` | Comparison state and paired previews.                                      |
-| `src/features/config/`     | Lossless config parsing, validation, settings, and transfer dialog.        |
-| `src/shared/`              | Browser preferences and theme numbering and search.                        |
+| `src/features/config/`     | Lossless config parsing, validation, settings, drafts, presets, transfer.  |
+| `src/features/palette/`    | Color overrides, the palette editor, and theme file import and export.     |
+| `src/features/share/`      | Shared link parsing and building, the share dialog, and link notices.      |
+| `src/shared/`              | Preferences, preview samples, theme search, and OKLab color math.          |
 | `src/data/themes.js`       | Generated theme catalog.                                                   |
 | `src/styles/`              | UI tokens and component styles.                                            |
 | `scripts/`                 | Theme refresh and hook installation.                                       |

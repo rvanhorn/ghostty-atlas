@@ -17,6 +17,7 @@ export const ThemeStrip = ({
   savedThemes,
   onSelect,
   onToggleSaved,
+  onShowPalette,
   onClearFilters,
   resetKey,
 }) => {
@@ -138,13 +139,23 @@ export const ThemeStrip = ({
     }
   }, [focusedIndex, focusedThemeName, virtualItems]);
 
+  // Native scroll snapping only sees mounted cards and pulls fast scrolling
+  // back toward them, so the arrows align to a card edge themselves.
   const scrollThemes = (direction) => {
     const viewport = viewportRef.current;
     const reduceMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches;
-    viewport.scrollBy({
-      left: direction * viewport.clientWidth * 0.85,
+    const stride = cardWidth + 16;
+    const target =
+      viewport.scrollLeft + direction * viewport.clientWidth * 0.85;
+    const index = Math.max(
+      0,
+      Math.min(themes.length - 1, Math.round(target / stride)),
+    );
+    // A card starts at 16 + index * stride; the 16px scroll padding offsets it.
+    viewport.scrollTo({
+      left: index * stride,
       behavior: reduceMotion ? "instant" : "smooth",
     });
   };
@@ -241,6 +252,7 @@ export const ThemeStrip = ({
                   saved={savedThemes.includes(theme.name)}
                   onSelect={onSelect}
                   onToggleSaved={onToggleSaved}
+                  onShowPalette={onShowPalette}
                 />
               </div>
             );

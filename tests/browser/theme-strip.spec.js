@@ -81,6 +81,58 @@ test("bounds mounting, preserves full list metadata, and covers both scroll dire
   await expect(viewport(page)).toHaveAttribute("data-fade-left", "false");
 });
 
+// Issue #15: fast scrolling into unmounted themes must land where the input
+// sent it instead of being pulled back toward the rendered range.
+test("fast wheel bursts reach unseen themes in both directions without pull-back", async ({
+  page,
+}) => {
+  const settledOffset = () =>
+    expect
+      .poll(
+        async () => {
+          const first = await viewport(page).evaluate((e) => e.scrollLeft);
+          await page.waitForTimeout(150);
+          const second = await viewport(page).evaluate((e) => e.scrollLeft);
+          return first === second ? second : null;
+        },
+        { timeout: 5000 },
+      )
+      .not.toBeNull();
+  const offset = () => viewport(page).evaluate((element) => element.scrollLeft);
+  const fillsViewport = () =>
+    viewport(page).evaluate((element) => {
+      const bounds = element.getBoundingClientRect();
+      const visible = [...element.querySelectorAll(".theme-strip-item")]
+        .map((item) => item.getBoundingClientRect())
+        .filter((rect) => rect.right > bounds.left && rect.left < bounds.right);
+      return (
+        visible.length > 0 &&
+        Math.min(...visible.map((rect) => rect.left)) <= bounds.left + 16 &&
+        Math.max(...visible.map((rect) => rect.right)) >= bounds.right - 16
+      );
+    });
+  const box = await viewport(page).boundingBox();
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+
+  for (const direction of [1, -1]) {
+    if (direction < 0) {
+      await viewport(page).evaluate((element) => {
+        element.scrollLeft = element.scrollWidth;
+      });
+      await settledOffset();
+    }
+    const start = await offset();
+    // Firefox scrolls at most about one viewport width per wheel event, so
+    // each burst stays under the 1280px viewport.
+    for (let burst = 0; burst < 9; burst++) {
+      await page.mouse.wheel(direction * 1000, 0);
+    }
+    await settledOffset();
+    expect(await offset()).toBe(start + direction * 9000);
+    await expect.poll(fillsViewport).toBe(true);
+  }
+});
+
 test("keyboard navigation reaches unmounted themes and clamps at catalog edges", async ({
   page,
 }) => {
@@ -192,7 +244,9 @@ test("responsive resizing preserves correct card sizes and navigation", async ({
   await page.setViewportSize({ width: 1440, height: 900 });
   await pick(page, 0).focus();
   await page.keyboard.press("End");
-  for (const width of [390, 850, 851, 1440]) {
+  // Issue #9: compact layouts (800px and narrower) use smaller cards so the
+  // preview stays near the strip.
+  for (const width of [390, 800, 801, 850, 851, 1440]) {
     await page.setViewportSize({ width, height: 900 });
     await expect
       .poll(() =>
@@ -201,7 +255,7 @@ test("responsive resizing preserves correct card sizes and navigation", async ({
           .last()
           .evaluate((element) => element.getBoundingClientRect().width),
       )
-      .toBe(width <= 850 ? 276 : 296);
+      .toBe(width <= 800 ? 224 : width <= 850 ? 276 : 296);
     await page.keyboard.press("Home");
     await expectVisibleCard(page, 0);
     if (width === 390 || width === 1440) {
@@ -230,6 +284,16 @@ test("bookmarks and sample updates survive unmounting; reduced-motion arrows wor
   await expect
     .poll(() => viewport(page).evaluate((element) => element.scrollLeft))
     .toBeGreaterThan(0);
+  // Without native snapping, the arrows still stop with a card at the start edge.
+  expect(
+    await viewport(page).evaluate((element) => {
+      const bounds = element.getBoundingClientRect();
+      return [...element.querySelectorAll(".theme-strip-item")].some(
+        (item) =>
+          Math.abs(item.getBoundingClientRect().left - bounds.left - 16) < 1,
+      );
+    }),
+  ).toBe(true);
   await page.getByRole("button", { name: "Code Sample" }).click();
   await page.getByRole("button", { name: "Select Last", exact: true }).click();
   await pick(page, themes.length - 1).focus();
