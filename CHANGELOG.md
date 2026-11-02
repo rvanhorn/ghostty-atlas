@@ -2,7 +2,7 @@
 
 All notable changes to Ghostty Atlas are documented here, grouped by release.
 
-## Unreleased
+## 1.2.0 - 2026-11-01
 
 ### Added
 
